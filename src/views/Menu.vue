@@ -11,7 +11,7 @@
   </div>
 
   <div style="margin:10px 0">
-    <el-button class="ml-5" type="primary" @click="handleAdd">新增<i class="el-icon-circle-plus-outline"></i> </el-button>
+    <el-button class="ml-5" type="primary" @click="handleAdd(8)">新增<i class="el-icon-circle-plus-outline"></i> </el-button>
     <el-popconfirm
         class="ml-5"
         confirm-button-text='好的'
@@ -41,8 +41,12 @@
     <el-table-column prop="icon" label="图标" > </el-table-column>
     <el-table-column prop="description" label="描述" > </el-table-column>
 
-    <el-table-column label="操作">
+    <el-table-column label="操作" width="300" align="center">
       <template slot-scope="scope">
+        <el-button
+            type="primary"
+            size="mini"
+            @click="handleAdd(scope.row.id)" v-if="!scope.row.pid && !scope.row.path">新增子菜单<i class="el-icon-plus"></i></el-button>
         <el-button
             size="mini"
             @click="handleEdit(scope.row)">编辑<i class="el-icon-edit"></i></el-button>
@@ -86,7 +90,7 @@
 
 <script>
 export default {
-  name: "menu",
+  name: "Menu",
   data() {
 
     return {
@@ -133,9 +137,7 @@ export default {
           "name":this.name
         }
       }).then(res => {
-        console.log(res.data)
         this.tableData = res.data
-        this.total = res.data.total
       })
       // console.log("请求数据")
     },
@@ -145,9 +147,12 @@ export default {
       this.load();
     },
     //点击新增
-    handleAdd(){
+    handleAdd(pid){
       this.dialogFormVisible=true
       this.form={}
+      if(pid){
+        this.form.pid = pid
+      }
     },
     //增加数据
     save(){

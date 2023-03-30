@@ -96,6 +96,7 @@
   </el-dialog>
   <el-dialog title="菜单分配" :visible.sync="menuDialogVis" width="30%" style="padding: 0 50px">
     <el-tree
+        :props="props"
         node-key="id"
         :default-expanded-keys="[1,2]"
         :default-checked-keys="[1,3]"
@@ -129,30 +130,35 @@ export default {
       menuDialogVis:false,
       multipleSelection:[],
       headerBg:'headerBg',
-      menuData:[{
-        id:1,
-        label: '主页',
-        children: []
-        },
-        {
-        id: 2,
-        label: '系统管理',
-        children: [{
-            id: 3,
-            label: '用户管理',
-            children: []
-          },
-          {
-            id: 4,
-            label: '角色管理',
-            children: []
-          },
-          {
-            id: 5,
-            label: '文件管理',
-            children: []
-          }]
-      }]
+      menuData:[
+      //     {
+      //   id:1,
+      //   label: '主页',
+      //   children: []
+      //   },
+      //   {
+      //   id: 2,
+      //   label: '系统管理',
+      //   children: [{
+      //       id: 3,
+      //       label: '用户管理',
+      //       children: []
+      //     },
+      //     {
+      //       id: 4,
+      //       label: '角色管理',
+      //       children: []
+      //     },
+      //     {
+      //       id: 5,
+      //       label: '文件管理',
+      //       children: []
+      //     }]
+      // }
+      ],
+      props: {
+        label: 'name'
+      }
     }
   },
   //请求分页查询数据
@@ -191,6 +197,7 @@ export default {
         this.total = res.data.total
       })
       // console.log("请求数据")
+
     },
     //重置
     reset(){
@@ -266,6 +273,14 @@ export default {
     },
     selectMenu(rowId){
       this.menuDialogVis = true
+      //菜单数据
+      this.request.get("/menu",{
+        params:{
+          "name":this.name
+        }
+      }).then(res => {
+        this.menuData = res.data
+      })
     },
     //菜单分配
     handleCheckChange(data, checked, indeterminate) {
