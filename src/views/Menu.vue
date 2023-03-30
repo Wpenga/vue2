@@ -25,25 +25,24 @@
     </el-popconfirm>
   </div>
 
-  <el-table :data="tableData" stripe border :header-cell-class-name="headerBg" @selection-change="handleSelectionChange">
+  <el-table
+      row-key="id"
+      default-expand-all
+      :data="tableData" stripe border :header-cell-class-name="headerBg" @selection-change="handleSelectionChange">
     <!--多选框-->
     <el-table-column
         type="selection"
         width="55">
     </el-table-column>
-    <el-table-column prop="id" label="ID" width="140">
-    </el-table-column>
-    <el-table-column prop="name" label="名称" width="120">
-    </el-table-column>
-    <el-table-column prop="description" label="描述" >
-    </el-table-column>
+    <el-table-column prop="id" label="ID" width="140"></el-table-column>
+
+    <el-table-column prop="name" label="名称" width="120"></el-table-column>
+    <el-table-column prop="path" label="路径" > </el-table-column>
+    <el-table-column prop="icon" label="图标" > </el-table-column>
+    <el-table-column prop="description" label="描述" > </el-table-column>
 
     <el-table-column label="操作">
       <template slot-scope="scope">
-        <el-button
-            type="info"
-            size="mini"
-            @click="selectMenu(scope.row.id)">分配菜单<i class="el-icon-menu"></i></el-button>
         <el-button
             size="mini"
             @click="handleEdit(scope.row)">编辑<i class="el-icon-edit"></i></el-button>
@@ -67,44 +66,18 @@
     </el-table-column>
 
   </el-table>
-  <div style="padding: 10px 0">
-    <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pageNum"
-        :page-sizes="[5, 10, 15, 20]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total">
-    </el-pagination>
-  </div>
+
 <!--列表内容-->
-  <el-dialog title="角色信息" :visible.sync="dialogFormVisible" width="30%">
+  <el-dialog title="菜单管理" :visible.sync="dialogFormVisible" width="30%">
     <el-form label-width="80px">
-      <el-form-item label="名称">
-        <el-input v-model="form.name" autocomplete="off"></el-input>
-      </el-form-item>
-      <el-form-item label="描述">
-        <el-input v-model="form.description" autocomplete="off"></el-input>
-      </el-form-item>
+      <el-form-item label="名称"> <el-input v-model="form.name" autocomplete="off"></el-input></el-form-item>
+      <el-form-item label="路径"> <el-input v-model="form.path" autocomplete="off"></el-input></el-form-item>
+      <el-form-item label="图标"> <el-input v-model="form.icon" autocomplete="off"></el-input></el-form-item>
+      <el-form-item label="描述"> <el-input v-model="form.description" autocomplete="off"></el-input></el-form-item>
 
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialogFormVisible = false">取 消</el-button>
-      <el-button type="primary" @click="save">确 定</el-button>
-    </div>
-  </el-dialog>
-  <el-dialog title="菜单分配" :visible.sync="menuDialogVis" width="30%" style="padding: 0 50px">
-    <el-tree
-        node-key="id"
-        :default-expanded-keys="[1,2]"
-        :default-checked-keys="[1,3]"
-        :data="menuData"
-        show-checkbox
-        @check-change="handleCheckChange">
-    </el-tree>
-    <div slot="footer" class="dialog-footer">
-      <el-button @click="menuDialogVis = false">取 消</el-button>
       <el-button type="primary" @click="save">确 定</el-button>
     </div>
   </el-dialog>
@@ -113,7 +86,7 @@
 
 <script>
 export default {
-  name: "Role",
+  name: "menu",
   data() {
 
     return {
@@ -123,36 +96,14 @@ export default {
       pageSize:5,
       id:'',
       name:'',
+      path:'',
+      icon:'',
       description:'',
       form:{},
       dialogFormVisible:false,
-      menuDialogVis:false,
       multipleSelection:[],
-      headerBg:'headerBg',
-      menuData:[{
-        id:1,
-        label: '主页',
-        children: []
-        },
-        {
-        id: 2,
-        label: '系统管理',
-        children: [{
-            id: 3,
-            label: '用户管理',
-            children: []
-          },
-          {
-            id: 4,
-            label: '角色管理',
-            children: []
-          },
-          {
-            id: 5,
-            label: '文件管理',
-            children: []
-          }]
-      }]
+      headerBg:'headerBg'
+
     }
   },
   //请求分页查询数据
@@ -177,17 +128,13 @@ export default {
     },
     //获取全部数据
     load(){
-      // /page?pageNum=1&pageSize=2
-      this.request.get("/role/page",{
+      this.request.get("/menu",{
         params:{
-          "pageNum":this.pageNum,
-          "pageSize":this.pageSize,
-          "name":this.name,
-          // "description":this.description
+          "name":this.name
         }
       }).then(res => {
-        // console.log(res)
-        this.tableData = res.data.records
+        console.log(res.data)
+        this.tableData = res.data
         this.total = res.data.total
       })
       // console.log("请求数据")
@@ -204,7 +151,7 @@ export default {
     },
     //增加数据
     save(){
-      this.request.post("http://localhost:8090/role",this.form).then(res=>{
+      this.request.post("http://localhost:8090/menu",this.form).then(res=>{
         if(res.code ==="200"){
           this.$message.success("保存成功")
           this.dialogFormVisible=false
@@ -223,7 +170,7 @@ export default {
     //删操作
     handleDelete(row) {
       // this.dialogFormVisible=true
-      this.request.delete("http://localhost:8090/role/"+row.id).then(res=>{
+      this.request.delete("http://localhost:8090/menu/"+row.id).then(res=>{
         if(res.code ==="200"){
           this.$message.success("删除成功")
           this.load()
@@ -240,7 +187,7 @@ export default {
     //批量删除
     delBatch(){
       let ids = this.multipleSelection.map(v => v.id)  //[1,2,3]
-      this.request.post("/role/del/batch",ids).then(res=>{
+      this.request.post("/menu/del/batch",ids).then(res=>{
         if(res.code === "200"){
           this.$message.success("批量删除成功")
           this.load()
@@ -264,13 +211,16 @@ export default {
     filterTag(value, row) {
       return row.sign === value;
     },
-    selectMenu(rowId){
-      this.menuDialogVis = true
+    //导出表格
+    exp(){
+      // this.request("/menu/export")
+      window.open("http://localhost:8090/menu/export")
     },
-    //菜单分配
-    handleCheckChange(data, checked, indeterminate) {
-      console.log(data, checked, indeterminate);
-    },
+    //导入表格
+    handleExcelImportSuccess(){
+      this.$message.success("导入成功")
+      this.load()
+    }
   }
 }
 </script>
