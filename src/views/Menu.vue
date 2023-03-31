@@ -76,7 +76,11 @@
     <el-form label-width="80px">
       <el-form-item label="名称"> <el-input v-model="form.name" autocomplete="off"></el-input></el-form-item>
       <el-form-item label="路径"> <el-input v-model="form.path" autocomplete="off"></el-input></el-form-item>
-      <el-form-item label="图标"> <el-input v-model="form.icon" autocomplete="off"></el-input></el-form-item>
+      <el-form-item label="图标">
+        <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 100%">
+          <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.name"></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="描述"> <el-input v-model="form.description" autocomplete="off"></el-input></el-form-item>
 
     </el-form>
@@ -106,8 +110,8 @@ export default {
       form:{},
       dialogFormVisible:false,
       multipleSelection:[],
-      headerBg:'headerBg'
-
+      headerBg:'headerBg',
+      options:[]
     }
   },
   //请求分页查询数据
@@ -170,7 +174,11 @@ export default {
     // 改操作
     handleEdit(row) {
       this.dialogFormVisible=true
-      this.form=row
+      this.form=JSON.parse(JSON.stringify(row))
+      //获取图标数据
+      this.request.get("/menu/icons").then(res => {
+        this.options = res.data
+      })
     },
     //删操作
     handleDelete(row) {
