@@ -38,7 +38,9 @@
 
     <el-table-column prop="name" label="名称" width="120"></el-table-column>
     <el-table-column prop="path" label="路径" > </el-table-column>
-    <el-table-column prop="icon" label="图标" > </el-table-column>
+    <el-table-column prop="icon" label="图标" align="center">
+      <i :class="scoped.row.icon" style="font-size: 18px"></i>
+    </el-table-column>
     <el-table-column prop="description" label="描述" > </el-table-column>
 
     <el-table-column label="操作" width="300" align="center">
@@ -78,7 +80,9 @@
       <el-form-item label="路径"> <el-input v-model="form.path" autocomplete="off"></el-input></el-form-item>
       <el-form-item label="图标">
         <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 100%">
-          <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.name"></el-option>
+          <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.name">
+            <i :class="item.value"/><span style="float: left">{{item.name}}</span>
+          </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="描述"> <el-input v-model="form.description" autocomplete="off"></el-input></el-form-item>
@@ -96,7 +100,6 @@
 export default {
   name: "Menu",
   data() {
-
     return {
       tableData: [],
       total:0,
