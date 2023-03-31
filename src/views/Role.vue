@@ -96,17 +96,21 @@
   </el-dialog>
   <el-dialog title="菜单分配" :visible.sync="menuDialogVis" width="30%" style="padding: 0 50px">
     <el-tree
+        ref="tree"
         :props="props"
         node-key="id"
-        :default-expanded-keys="[1,2]"
-        :default-checked-keys="[1,3]"
+        :default-expanded-keys="expends"
+        :default-checked-keys="checks"
         :data="menuData"
-        show-checkbox
-        @check-change="handleCheckChange">
+        show-checkbox>
+      <!--图标-->
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span><i :class="data.icon"/>{{ data.name }}</span>
+      </span>
     </el-tree>
     <div slot="footer" class="dialog-footer">
       <el-button @click="menuDialogVis = false">取 消</el-button>
-      <el-button type="primary" @click="save">确 定</el-button>
+      <el-button type="primary" @click="saveRoleMenu">确 定</el-button>
     </div>
   </el-dialog>
 </div>
@@ -158,7 +162,10 @@ export default {
       ],
       props: {
         label: 'name'
-      }
+      },
+      expends:[],
+      checks:[],
+      roleId:0
     }
   },
   //请求分页查询数据
@@ -204,23 +211,10 @@ export default {
       this.name='',
       this.load();
     },
-    //点击新增
+    //新增按钮
     handleAdd(){
       this.dialogFormVisible=true
       this.form={}
-    },
-    //增加数据
-    save(){
-      this.request.post("http://localhost:8090/role",this.form).then(res=>{
-        if(res.code ==="200"){
-          this.$message.success("保存成功")
-          this.dialogFormVisible=false
-          this.load()
-        }else{
-          this.$message.error("保存失败")
-        }
-
-      })
     },
     // 改操作
     handleEdit(row) {
@@ -237,7 +231,6 @@ export default {
         }else{
           this.$message.error("删除失败")
         }
-        // console.log(index, row)
       })
     },
     //多选
@@ -266,13 +259,38 @@ export default {
       this.pageNum=val
       this.load()
     },
-
     //筛选
     filterTag(value, row) {
       return row.sign === value;
     },
-    selectMenu(rowId){
+    //增加数据
+    save(){
+      this.request.post("http://localhost:8090/role",this.form).then(res=>{
+        if(res.code ==="200"){
+          this.$message.success("保存成功")
+          this.dialogFormVisible=false
+          this.load()
+        }else{
+          this.$message.error("保存失败")
+        }
+
+      })
+    },
+    //修改菜单 保存
+    saveRoleMenu(){
+      this.request.post("/role/roleMenu/" + this.roleId, this.$refs.tree.getCheckedKeys()).then(res=>{
+        if(res.code ==="200"){
+          this.$message.success("保存成功")
+          this.menuDialogVis=false
+        }else {
+          this.$message.error(res.msg)
+        }
+      })
+    },
+    //菜单分配
+    selectMenu(roleId){
       this.menuDialogVis = true
+      this.roleId = roleId
       //菜单数据
       this.request.get("/menu",{
         params:{
@@ -280,12 +298,14 @@ export default {
         }
       }).then(res => {
         this.menuData = res.data
+        //后台菜单数据转化成id数组
+        this.expends = this.menuData.map(v => v.id)
       })
-    },
-    //菜单分配
-    handleCheckChange(data, checked, indeterminate) {
-      console.log(data, checked, indeterminate);
-    },
+      //获取已选择的菜单数组
+      this.request.get("/role/roleMenu/" + this.roleId).then(res=>{
+        this.checks = res.data
+      })
+    }
   }
 }
 </script>

@@ -46,7 +46,7 @@ import * as echarts from 'echarts';
 export default {
   name: "Home",
   data(){
-    return
+    return {}
   },
   mounted() {//页面元素渲染之后再触发
     var chartDom = document.getElementById('main');

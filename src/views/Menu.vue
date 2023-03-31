@@ -38,8 +38,10 @@
 
     <el-table-column prop="name" label="名称" width="120"></el-table-column>
     <el-table-column prop="path" label="路径" > </el-table-column>
-    <el-table-column prop="icon" label="图标" align="center">
-      <i :class="scoped.row.icon" style="font-size: 18px"></i>
+    <el-table-column label="图标" align="center">
+      <template slot-scope="scope">
+        <i :class="scope.row.icon" style="font-size: 18px"></i>
+      </template>
     </el-table-column>
     <el-table-column prop="description" label="描述" > </el-table-column>
 
@@ -80,8 +82,8 @@
       <el-form-item label="路径"> <el-input v-model="form.path" autocomplete="off"></el-input></el-form-item>
       <el-form-item label="图标">
         <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 100%">
-          <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.name">
-            <i :class="item.value"/><span style="float: left">{{item.name}}</span>
+          <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.value">
+            <i :class="item.value" /> {{ item.name }}
           </el-option>
         </el-select>
       </el-form-item>
@@ -181,6 +183,7 @@ export default {
       //获取图标数据
       this.request.get("/menu/icons").then(res => {
         this.options = res.data
+        console.log(res.data)
       })
     },
     //删操作
@@ -226,16 +229,6 @@ export default {
     //筛选
     filterTag(value, row) {
       return row.sign === value;
-    },
-    //导出表格
-    exp(){
-      // this.request("/menu/export")
-      window.open("http://localhost:8090/menu/export")
-    },
-    //导入表格
-    handleExcelImportSuccess(){
-      this.$message.success("导入成功")
-      this.load()
     }
   }
 }
