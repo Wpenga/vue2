@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import {setRoutes} from "@/router";
+import router, {setRoutes} from "@/router";
 
 export default {
   name: "Login",
@@ -49,14 +49,13 @@ export default {
         if (valid) {//表单校验合法
           this.request.post("/user/login",this.user).then(res=>{
             if(res.code==="200"){
-              this.$message.success("登录成功")
-              this.$router.push("/")
               //存储数据 包含用户名，密码，昵称，图片url
               localStorage.setItem("user",JSON.stringify(res.data))
               localStorage.setItem("menus",JSON.stringify(res.data.menus))
-
               //设置当前路由
               setRoutes()
+              this.$message.success("登录成功")
+              this.$router.push("/")
 
             }else if(res.code=="500"){
               this.$message.error("系统错误")

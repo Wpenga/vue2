@@ -12,7 +12,6 @@
         <!--<el-breadcrumb-item>活动列表</el-breadcrumb-item>-->
         <!--<el-breadcrumb-item>活动详情</el-breadcrumb-item>-->
       </el-breadcrumb>
-<!--    </div>-->
   </div>
 
     <!--  cursor:pointer 实现鼠标变拳头-->
@@ -48,8 +47,9 @@ export default {
   },
   methods:{
     logout(){//退出登录
-      this.$router.push("/login")
-      localStorage.removeItem("user") //清楚登录数据
+      this.$store.commit("logout")
+      // this.$router.push("/login")
+      // localStorage.removeItem("user") //清楚登录数据
       this.$message.success("退出成功")
     }
   },

@@ -28,10 +28,7 @@ import Aside from "@/components/Aside";
 import Header from "@/components/Header";
 
 export default {
- /* name: 'HomeView',
-  components: {
-    HelloWorld
-  },*/
+  name: 'Home',
   //注册组件
   components: {
     Aside,
@@ -46,24 +43,6 @@ export default {
       sideWidth:200,
       logoTextShow:true,
       user:{}
-      // id:'',
-      // username:'',
-      // address:'',
-      // sign:'',
-      // form:{},
-      // dialogFormVisible:false,
-      // multipleSelection:[],
-      //
-      // tableData: [],
-      // total:0,
-      // pageNum:1,
-      // pageSize:5,
-      // collapseBtnClass:'el-icon-s-fold',
-      // //收缩
-      // isCollapse:false,
-      // sideWidth:200,
-      // headerBg:'headerBg',
-      // logoTextShow:true
     }
   },
   created() {

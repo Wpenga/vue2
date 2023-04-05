@@ -24,7 +24,7 @@
     >
       <el-button class="ml-5" type="danger" slot="reference">批量删除<i class="el-icon-remove-outline"></i> </el-button>
     </el-popconfirm>
-    <el-upload action="http://localhost:8090/user/import"
+    <el-upload :action="'http://'+ serverIp+':8090/user/import'"
                :show-file-list="false" accept=".xlsx"
                :on-success="handleExcelImportSuccess"
                style="display: inline-block">
@@ -40,12 +40,10 @@
         type="selection"
         width="55">
     </el-table-column>
-    <el-table-column prop="id" label="学号" width="140">
-    </el-table-column>
-    <el-table-column prop="username" label="姓名" width="120">
-    </el-table-column>
-    <el-table-column prop="phone" label="联系方式" >
-    </el-table-column>
+    <el-table-column prop="id" label="学号" width="140"></el-table-column>
+    <el-table-column prop="role" label="角色" width="140"></el-table-column>
+    <el-table-column prop="username" label="姓名" width="120"></el-table-column>
+    <el-table-column prop="phone" label="联系方式" ></el-table-column>
     <el-table-column
         prop="sign"
         label="签到状态"
@@ -105,6 +103,13 @@
       <el-form-item label="姓名">
         <el-input v-model="form.username" autocomplete="off"></el-input>
       </el-form-item>
+      <el-form-item label="角色">
+        <el-select clearable v-model="form.role" placeholder="请选择角色" style="width: 100%">
+          <el-option v-for="item in roles" :key="item.name" :label="item.name" :value="item.flag">
+            <i :class="item.value" /> {{ item.name }}
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="学号">
         <el-input v-model="form.id" autocomplete="off"></el-input>
       </el-form-item>
@@ -128,11 +133,14 @@
 </template>
 
 <script>
+import {serverIp} from "../../public/config";
+
 export default {
   name: "User",
   data() {
 
     return {
+      serverIp:serverIp,
       tableData: [],
       total:0,
       pageNum:1,
@@ -144,8 +152,8 @@ export default {
       form:{},
       dialogFormVisible:false,
       multipleSelection:[],
-      headerBg:'headerBg'
-
+      headerBg:'headerBg',
+      roles:[]
     }
   },
   //请求分页查询数据
@@ -179,11 +187,13 @@ export default {
           "address":this.address
         }
       }).then(res => {
-        // console.log(res)
         this.tableData = res.data.records
         this.total = res.data.total
       })
-      // console.log("请求数据")
+
+      this.request.get("/role").then(res=>{
+        this.roles = res.data
+      })
     },
     //重置
     reset(){
@@ -198,7 +208,7 @@ export default {
     },
     //增加数据
     save(){
-      this.request.post("http://localhost:8090/user",this.form).then(res=>{
+      this.request.post("/user",this.form).then(res=>{
         if(res.code ==="200"){
           this.$message.success("保存成功")
           this.dialogFormVisible=false
@@ -217,7 +227,7 @@ export default {
     //删操作
     handleDelete(row) {
       // this.dialogFormVisible=true
-      this.request.delete("http://localhost:8090/user/"+row.id).then(res=>{
+      this.request.delete("/user/"+row.id).then(res=>{
         if(res.code ==="200"){
           this.$message.success("删除成功")
           this.load()
@@ -261,7 +271,7 @@ export default {
     //导出表格
     exp(){
       // this.request("/user/export")
-      window.open("http://localhost:8090/user/export")
+      window.open(`http://${serverIp}:8090/user/export`)
     },
     //导入表格
     handleExcelImportSuccess(){

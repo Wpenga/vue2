@@ -27,23 +27,19 @@
 
   <el-table :data="tableData" stripe border :header-cell-class-name="headerBg" @selection-change="handleSelectionChange">
     <!--多选框-->
-    <el-table-column
-        type="selection"
-        width="55">
-    </el-table-column>
-    <el-table-column prop="id" label="ID" width="140">
-    </el-table-column>
-    <el-table-column prop="name" label="名称" width="120">
-    </el-table-column>
-    <el-table-column prop="description" label="描述" >
-    </el-table-column>
+    <el-table-column type="selection" width="55"></el-table-column>
+
+    <el-table-column prop="id" label="ID" width="140"></el-table-column>
+    <el-table-column prop="name" label="名称" width="120"> </el-table-column>
+    <el-table-column prop="flag" label="唯一标识" width="120"> </el-table-column>
+    <el-table-column prop="description" label="描述" ></el-table-column>
 
     <el-table-column label="操作">
       <template slot-scope="scope">
         <el-button
             type="info"
             size="mini"
-            @click="selectMenu(scope.row.id)">分配菜单<i class="el-icon-menu"></i></el-button>
+            @click="selectMenu(scope.row)">分配菜单<i class="el-icon-menu"></i></el-button>
         <el-button
             size="mini"
             @click="handleEdit(scope.row)">编辑<i class="el-icon-edit"></i></el-button>
@@ -84,6 +80,9 @@
       <el-form-item label="名称">
         <el-input v-model="form.name" autocomplete="off"></el-input>
       </el-form-item>
+      <el-form-item label="唯一标识">
+        <el-input v-model="form.flag" autocomplete="off"></el-input>
+      </el-form-item>
       <el-form-item label="描述">
         <el-input v-model="form.description" autocomplete="off"></el-input>
       </el-form-item>
@@ -96,6 +95,8 @@
   </el-dialog>
   <el-dialog title="菜单分配" :visible.sync="menuDialogVis" width="30%" style="padding: 0 50px">
     <el-tree
+        :check-strictly="true"
+
         ref="tree"
         :props="props"
         node-key="id"
@@ -165,7 +166,8 @@ export default {
       },
       expends:[],
       checks:[],
-      roleId:0
+      roleId:0,
+      roleFlag:''
     }
   },
   //请求分页查询数据
@@ -224,7 +226,7 @@ export default {
     //删操作
     handleDelete(row) {
       // this.dialogFormVisible=true
-      this.request.delete("http://localhost:8090/role/"+row.id).then(res=>{
+      this.request.delete("/role/"+row.id).then(res=>{
         if(res.code ==="200"){
           this.$message.success("删除成功")
           this.load()
@@ -265,8 +267,8 @@ export default {
     },
     //增加数据
     save(){
-      this.request.post("http://localhost:8090/role",this.form).then(res=>{
-        if(res.code ==="200"){
+      this.request.post("/role",this.form).then(res=>{
+        if(res.code === "200"){
           this.$message.success("保存成功")
           this.dialogFormVisible=false
           this.load()
@@ -279,22 +281,30 @@ export default {
     //修改菜单 保存
     saveRoleMenu(){
       this.request.post("/role/roleMenu/" + this.roleId, this.$refs.tree.getCheckedKeys()).then(res=>{
-        if(res.code ==="200"){
-          this.$message.success("保存成功")
-          this.menuDialogVis=false
-        }else {
+        if (res.code === '200') {
+          this.$message.success("绑定成功")
+          this.menuDialogVis = false
+
+          // 操作管理员角色后需要重新登录
+          if (this.roleFlag === 'ROLE_ADMIN') {
+            this.$message.success("重登生效")
+            // this.$store.commit("logout")
+          }
+
+        } else {
           this.$message.error(res.msg)
         }
       })
     },
     //菜单分配
-    selectMenu(roleId){
+    selectMenu(role){
       this.menuDialogVis = true
-      this.roleId = roleId
+      this.roleId = role.id
+      this.roleFlag = role.flag
       //菜单数据
       this.request.get("/menu",{
         params:{
-          "name":this.name
+          name: this.name
         }
       }).then(res => {
         this.menuData = res.data
@@ -303,7 +313,9 @@ export default {
       })
       //获取已选择的菜单数组
       this.request.get("/role/roleMenu/" + this.roleId).then(res=>{
+
         this.checks = res.data
+        // console.log(this.checks)
       })
     }
   }

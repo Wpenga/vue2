@@ -11,7 +11,7 @@
   </div>
 
   <div style="margin:10px 0">
-    <el-button class="ml-5" type="primary" @click="handleAdd(8)">新增<i class="el-icon-circle-plus-outline"></i> </el-button>
+    <el-button class="ml-5" type="primary" @click="handleAdd(null)">新增<i class="el-icon-circle-plus-outline"></i> </el-button>
     <el-popconfirm
         class="ml-5"
         confirm-button-text='好的'
@@ -38,6 +38,7 @@
 
     <el-table-column prop="name" label="名称" width="120"></el-table-column>
     <el-table-column prop="path" label="路径" > </el-table-column>
+    <el-table-column prop="pagePath" label="页面路径" > </el-table-column>
     <el-table-column label="图标" align="center">
       <template slot-scope="scope">
         <i :class="scope.row.icon" style="font-size: 18px"></i>
@@ -80,6 +81,7 @@
     <el-form label-width="80px">
       <el-form-item label="名称"> <el-input v-model="form.name" autocomplete="off"></el-input></el-form-item>
       <el-form-item label="路径"> <el-input v-model="form.path" autocomplete="off"></el-input></el-form-item>
+      <el-form-item label="页面路径"> <el-input v-model="form.pagePath" autocomplete="off"></el-input></el-form-item>
       <el-form-item label="图标">
         <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 100%">
           <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.value">
@@ -148,7 +150,10 @@ export default {
       }).then(res => {
         this.tableData = res.data
       })
-      // console.log("请求数据")
+      //获取图标数据
+      this.request.get("/menu/icons").then(res => {
+        this.options = res.data
+      })
     },
     //重置
     reset(){
@@ -165,7 +170,7 @@ export default {
     },
     //增加数据
     save(){
-      this.request.post("http://localhost:8090/menu",this.form).then(res=>{
+      this.request.post("/menu",this.form).then(res=>{
         if(res.code ==="200"){
           this.$message.success("保存成功")
           this.dialogFormVisible=false
@@ -180,16 +185,12 @@ export default {
     handleEdit(row) {
       this.dialogFormVisible=true
       this.form=JSON.parse(JSON.stringify(row))
-      //获取图标数据
-      this.request.get("/menu/icons").then(res => {
-        this.options = res.data
-        console.log(res.data)
-      })
+
     },
     //删操作
     handleDelete(row) {
       // this.dialogFormVisible=true
-      this.request.delete("http://localhost:8090/menu/"+row.id).then(res=>{
+      this.request.delete("/menu/"+row.id).then(res=>{
         if(res.code ==="200"){
           this.$message.success("删除成功")
           this.load()
