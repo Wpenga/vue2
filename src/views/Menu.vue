@@ -148,6 +148,8 @@ export default {
           "name":this.name
         }
       }).then(res => {
+        console.log("获取的数据")
+        console.log(res.data)
         this.tableData = res.data
       })
       //获取图标数据
@@ -171,6 +173,8 @@ export default {
     //增加数据
     save(){
       this.request.post("/menu",this.form).then(res=>{
+        console.log("保存数据")
+        console.log(this.form)
         if(res.code ==="200"){
           this.$message.success("保存成功")
           this.dialogFormVisible=false

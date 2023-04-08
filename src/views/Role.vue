@@ -95,7 +95,6 @@
   </el-dialog>
   <el-dialog title="菜单分配" :visible.sync="menuDialogVis" width="30%" style="padding: 0 50px">
     <el-tree
-        :check-strictly="true"
 
         ref="tree"
         :props="props"
@@ -136,29 +135,29 @@ export default {
       multipleSelection:[],
       headerBg:'headerBg',
       menuData:[
-      //     {
-      //   id:1,
-      //   label: '主页',
-      //   children: []
-      //   },
-      //   {
-      //   id: 2,
-      //   label: '系统管理',
-      //   children: [{
-      //       id: 3,
-      //       label: '用户管理',
-      //       children: []
-      //     },
-      //     {
-      //       id: 4,
-      //       label: '角色管理',
-      //       children: []
-      //     },
-      //     {
-      //       id: 5,
-      //       label: '文件管理',
-      //       children: []
-      //     }]
+        //   {
+        // id:1,
+        // label: '主页',
+        // children: []
+        // },
+        // {
+        // id: 2,
+        // label: '系统管理',
+        // children: [{
+        //     id: 3,
+        //     label: '用户管理',
+        //     children: []
+        //   },
+        //   {
+        //     id: 4,
+        //     label: '角色管理',
+        //     children: []
+        //   },
+        //   {
+        //     id: 5,
+        //     label: '文件管理',
+        //     children: []
+        //   }]
       // }
       ],
       props: {
@@ -167,7 +166,8 @@ export default {
       expends:[],
       checks:[],
       roleId:0,
-      roleFlag:''
+      roleFlag:'',
+      ids:[]
     }
   },
   //请求分页查询数据
@@ -205,8 +205,10 @@ export default {
         this.tableData = res.data.records
         this.total = res.data.total
       })
-      // console.log("请求数据")
 
+      this.request.get("/menu/ids").then(r => {
+        this.ids = r.data
+      })
     },
     //重置
     reset(){
@@ -297,7 +299,7 @@ export default {
       })
     },
     //菜单分配
-    selectMenu(role){
+    async selectMenu(role){
       this.menuDialogVis = true
       this.roleId = role.id
       this.roleFlag = role.flag
@@ -315,6 +317,16 @@ export default {
       this.request.get("/role/roleMenu/" + this.roleId).then(res=>{
 
         this.checks = res.data
+        //对比checks和ids，checks在ids不存在的设置为未选择
+        this.ids.forEach(id => {
+          if (!this.checks.includes(id)) {
+            // 可能会报错：Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'setChecked')
+            this.$nextTick(() => {
+              this.$refs.tree.setChecked(id, false)//取消选中
+            })
+          }
+        })
+        this.menuDialogVis = true
         // console.log(this.checks)
       })
     }

@@ -6,8 +6,8 @@
     <span :class="collapseBtnClass" style="cursor: pointer;font-size: 18px;" @click="collapse"></span>
 <!--    <div style="margin-bottom:30px">-->
       <el-breadcrumb separator="/" style="display: inline-block;margin-left:10px">
-        <el-breadcrumb-item :to="'/'" v-for>首页</el-breadcrumb-item>
-        <el-breadcrumb-item>{{currentPathName}}</el-breadcrumb-item>
+        <el-breadcrumb-item :to="'/'">首页</el-breadcrumb-item>
+        <el-breadcrumb-item v-if="currentPathName !== '首页'">{{currentPathName}}</el-breadcrumb-item>
 <!--        <el-breadcrumb-item><a href="/">学生信息</a></el-breadcrumb-item>-->
         <!--<el-breadcrumb-item>活动列表</el-breadcrumb-item>-->
         <!--<el-breadcrumb-item>活动详情</el-breadcrumb-item>-->

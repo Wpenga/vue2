@@ -7,14 +7,16 @@
            :collapse="isCollapse"
            router
   >
-    <!--          图标logo-->
+    <!--图标logo-->
     <div style="height:60px;line-height: 60px;text-align:center">
       <img src="../assets/logo.png" style="width:20px;position: relative;top: 5px">
-      <!--            疫情防控-->
-      <b style="color:white" v-show="logoTextShow">管理系统</b>
+      <!--疫情防控-->
+      <b style="color:white" v-show="logoTextShow">疫情防控系统</b>
     </div>
     <!--动态菜单-->
+    
     <div v-for="item in menus" :key="item.id">
+      
       <div v-if="item.path">
         <el-menu-item :index="item.path">
           <i :class="item.icon"></i>
@@ -25,7 +27,7 @@
         <el-submenu :index="item.id + ''">
           <template slot="title">
             <i :class="item.icon"></i>
-            <span slot="title">{{ item.name }}</span>
+            <span slot="title" v-show="logoTextShow">{{ item.name }}</span>
           </template>
           <div  v-for="subItem in item.children" :key="subItem.id">
             <el-menu-item :index="subItem.path">
@@ -36,7 +38,7 @@
         </el-submenu>
       </div>
     </div>
-    <template>
+    <!-- <template> -->
 <!--    <el-submenu index="0">-->
 <!--    <el-menu-item index="/home">-->
 <!--      <template>-->
@@ -81,30 +83,30 @@
 <!--      </el-submenu>-->
 <!--    </el-submenu>-->
 
-<!--    <el-submenu index="4">-->
-<!--      <template slot="title">-->
-<!--        <i class="el-icon-menu"></i>-->
-<!--        <span slot="title">系统管理</span>-->
-<!--      </template>-->
+   <!-- <el-submenu index="4">
+     <template slot="title">
+       <i class="el-icon-menu"></i>
+       <span slot="title">系统管理</span>
+     </template>
 
-<!--      <el-menu-item index="/user">-->
-<!--        <i class="el-icon-user"></i>-->
-<!--        <span slot="title">用户管理</span>-->
-<!--      </el-menu-item>-->
-<!--      <el-menu-item index="/role">-->
-<!--        <i class="el-icon-user"></i>-->
-<!--        <span slot="title">角色管理</span>-->
-<!--      </el-menu-item>-->
-<!--      <el-menu-item index="/menu">-->
-<!--        <i class="el-icon-user"></i>-->
-<!--        <span slot="title">菜单管理</span>-->
-<!--      </el-menu-item>-->
-<!--      <el-menu-item index="/file">-->
-<!--        <i class="el-icon-document"></i>-->
-<!--        <span slot="title">文件管理</span>-->
-<!--      </el-menu-item>-->
-<!--    </el-submenu>-->
-    </template>
+     <el-menu-item index="/user">
+       <i class="el-icon-user"></i>
+       <span slot="title">用户管理</span>
+     </el-menu-item>
+     <el-menu-item index="/role">
+       <i class="el-icon-user"></i>
+       <span slot="title">角色管理</span>
+     </el-menu-item>
+     <el-menu-item index="/menu">
+       <i class="el-icon-user"></i>
+       <span slot="title">菜单管理</span>
+     </el-menu-item>
+     <el-menu-item index="/file">
+       <i class="el-icon-document"></i>
+       <span slot="title">文件管理1</spRan>
+     </el-menu-item>
+   </el-submenu> -->
+    <!-- </template> -->
   </el-menu>
 </template>
 

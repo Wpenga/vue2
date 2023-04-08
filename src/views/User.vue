@@ -3,8 +3,8 @@
 
   <!--搜索-->
   <div style="padding: 10px 0">
-    <el-input style="width: 200px" placeholder="请输入姓名"  suffix-icon="el-icon-user" v-model="username" clearable @clear="load"></el-input>
-    <el-input style="width: 200px" placeholder="请输入学号"  suffix-icon="el-icon-search" class="ml-5" v-model="id"></el-input>
+    <el-input style="width: 200px" placeholder="请输入姓名"  suffix-icon="el-icon-user" v-model="nickname" clearable @clear="load"></el-input>
+    <el-input style="width: 200px" placeholder="请输入学号"  suffix-icon="el-icon-search" class="ml-5" v-model="username"></el-input>
     <el-input style="width: 200px" placeholder="请输入地址"  suffix-icon="el-icon-position" class="ml-5" v-model="address"></el-input>
     <el-button class="ml-5" type="primary" @click="load">搜索</el-button>
     <el-button class="ml-5" type="warning" @click="reset">重置</el-button>
@@ -40,10 +40,11 @@
         type="selection"
         width="55">
     </el-table-column>
-    <el-table-column prop="id" label="学号" width="140"></el-table-column>
-    <el-table-column prop="role" label="角色" width="140"></el-table-column>
-    <el-table-column prop="username" label="姓名" width="120"></el-table-column>
-    <el-table-column prop="phone" label="联系方式" ></el-table-column>
+<!--    <el-table-column prop="id" label="id" width="140"></el-table-column>-->
+    <el-table-column prop="username" label="学号" width="140"></el-table-column>
+    <el-table-column prop="nickname" label="姓名" width="100"></el-table-column>
+    <el-table-column prop="role" label="角色" width="100"></el-table-column>
+    <el-table-column prop="phone" label="联系方式" width="120"></el-table-column>
     <el-table-column
         prop="sign"
         label="签到状态"
@@ -111,7 +112,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="学号">
-        <el-input v-model="form.id" autocomplete="off"></el-input>
+        <el-input v-model="form.username" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="联系方式">
         <el-input v-model="form.phone" autocomplete="off"></el-input>
@@ -148,6 +149,7 @@ export default {
       id:'',
       username:'',
       address:'',
+      nickname:'',
       sign:'',
       form:{},
       dialogFormVisible:false,
@@ -223,6 +225,7 @@ export default {
     handleEdit(row) {
       this.dialogFormVisible=true
       this.form=row
+      console.log(row)
     },
     //删操作
     handleDelete(row) {

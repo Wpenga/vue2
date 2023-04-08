@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/Manage.vue'
-import index from "@/store";
+// import HomeView from '../views/Manage.vue'
+import store from "@/store";
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css' // progress bar style
 Vue.use(VueRouter)
 
 const routes = [
@@ -9,7 +11,7 @@ const routes = [
   {
     path: '/about',
     name: 'about',
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    component: () => import('../views/AboutView.vue')
   },
   {
     path: '/login',
@@ -45,7 +47,7 @@ export const resetRouter = () => {
 export const setRoutes = () => {
   const storeMenus = localStorage.getItem("menus")
 
-  ////动态路由 拼装
+  //动态路由 拼装
   if(storeMenus){
     //获取当前路由对象名称数组
     const  currentRouteNames = router.getRoutes().map(v => v.name)
@@ -53,6 +55,7 @@ export const setRoutes = () => {
     if(!currentRouteNames.includes('Manage')){
       const manageRoute = { path: '/', name: 'Manage', component: () => import('../views/Manage.vue'), redirect: "/home", children: [
           { path: 'person', name: '个人信息', component: () => import('../views/Person.vue')},
+          // { path: 'public', name: '疫情信息', component: () => import('../views/Public.vue')},
           // { path: 'password', name: '修改密码', component: () => import('../views/Password.vue')}
           ]}
       const menus = JSON.parse(storeMenus)
@@ -97,22 +100,25 @@ setRoutes()
 
 //路由守卫
 router.beforeEach((to,from, next)=>{//路由名称
+  // start progress bar
+  NProgress.start()
+
   localStorage.setItem("currentPathName", to.name)  //设置路由名称
-  index.commit("setPath")  ///触发store的数据更新
-
-  console.log(to.matched)
-
+  store.commit("setPath")  ///触发store的数据更新
   // 未找到路由的情况
   if (!to.matched.length) {
     const storeMenus = localStorage.getItem("menus")
+    // start progress bar
+    
     if (storeMenus) {
       next("/404")
     } else {
       // 跳回登录页面
       next("/login")
     }
+    NProgress.done()
   }
-
+  NProgress.done()
   next()//放行路由
 })
 export default router

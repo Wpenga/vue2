@@ -22,6 +22,7 @@
 
 <script>
 import router, {setRoutes} from "@/router";
+import axios from 'axios';
 
 export default {
   name: "Login",
@@ -48,7 +49,7 @@ export default {
       this.$refs[user].validate((valid) => {
         if (valid) {//表单校验合法
           this.request.post("/user/login",this.user).then(res=>{
-            if(res.code==="200"){
+            if(res.code === "200"){
               //存储数据 包含用户名，密码，昵称，图片url
               localStorage.setItem("user",JSON.stringify(res.data))
               localStorage.setItem("menus",JSON.stringify(res.data.menus))
@@ -72,6 +73,7 @@ export default {
     },
     onRegister() {
       // 处理注册逻辑
+      axios.get("http://localhost:8080/user/getinfo").then(res => {console.log(res);})
       this.$router.push("/register")
     }
   }

@@ -3,7 +3,7 @@ import  Vuex from 'vuex'
 import router, {resetRouter} from "@/router";
 Vue.use(Vuex)
 
-const  index = new Vuex.Store({
+const  store = new Vuex.Store({
     state:{
         currentPathName:''
     },
@@ -23,4 +23,4 @@ const  index = new Vuex.Store({
     }
 })
 
-export  default  index
+export  default  store
