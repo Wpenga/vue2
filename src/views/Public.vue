@@ -127,7 +127,7 @@
 // import {getUserfever,gorisk,getfill} from '../api/user'
 import * as echarts from 'echarts'
 //  import '../../../node_modules/echarts/map/js/china.js'
-import '../../utils/china.js'
+import '@/utils/china.js'
 import jsonp from 'jsonp'
 
 const option = {
@@ -243,11 +243,11 @@ export default {
     //   this.count.risk=res2.count
     //   this.count.fill=res3.count
     // },
-    // setRowStyle({row, column}){
-    //   if(column.label=='累计治愈'){
-    //     return 'color:green'
-    //   }
-    // },
+    setRowStyle({row, column}){
+      if(column.label=='累计治愈'){
+        return 'color:green'
+      }
+    },
 
     // 获取疫情地图数据
     getData(){

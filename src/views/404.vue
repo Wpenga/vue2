@@ -1,9 +1,9 @@
 <template>
   <div class="not-found-container">
     <h1>404</h1>
-    <h1>Page not found</h1>
+    <h2>Page not found</h2>
 <!--    <p>Oops! The requested URL was not found on this server.</p>-->
-    <router-link to="/">Go to Home Page</router-link>
+    <router-link to="/">返回首页</router-link>
   </div>
 </template>
 

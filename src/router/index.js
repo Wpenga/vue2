@@ -2,8 +2,9 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 // import HomeView from '../views/Manage.vue'
 import store from "@/store";
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css' // progress bar style
+//进度条
+import NProgress from 'nprogress';  
+import 'nprogress/nprogress.css' 
 Vue.use(VueRouter)
 
 const routes = [
@@ -56,7 +57,7 @@ export const setRoutes = () => {
       const manageRoute = { path: '/', name: 'Manage', component: () => import('../views/Manage.vue'), redirect: "/home", children: [
           { path: 'person', name: '个人信息', component: () => import('../views/Person.vue')},
           // { path: 'public', name: '疫情信息', component: () => import('../views/Public.vue')},
-          // { path: 'password', name: '修改密码', component: () => import('../views/Password.vue')}
+          { path: 'password', name: '修改密码', component: () => import('../views/Password.vue')}
           ]}
       const menus = JSON.parse(storeMenus)
       menus.forEach(item => {
@@ -100,16 +101,14 @@ setRoutes()
 
 //路由守卫
 router.beforeEach((to,from, next)=>{//路由名称
-  // start progress bar
+  // 进度条
   NProgress.start()
-
+  
   localStorage.setItem("currentPathName", to.name)  //设置路由名称
   store.commit("setPath")  ///触发store的数据更新
   // 未找到路由的情况
   if (!to.matched.length) {
     const storeMenus = localStorage.getItem("menus")
-    // start progress bar
-    
     if (storeMenus) {
       next("/404")
     } else {

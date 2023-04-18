@@ -21,7 +21,7 @@
         title="您确定批量删除这些数据吗？"
         @confirm="delBatch"
     >
-      <el-button class="ml-5" type="danger" slot="reference">批量删除<i class="el-icon-remove-outline"></i> </el-button>
+      <el-button class="ml-5" type="danger" slot="reference" :disabled="multiple" >批量删除<i class="el-icon-remove-outline"></i> </el-button>
     </el-popconfirm>
   </div>
 
@@ -46,15 +46,18 @@
     </el-table-column>
     <el-table-column prop="description" label="描述" > </el-table-column>
 
+    <el-table-column prop="sortNum" label="顺序"></el-table-column>
     <el-table-column label="操作" width="300" align="center">
       <template slot-scope="scope">
         <el-button
             type="primary"
             size="mini"
-            @click="handleAdd(scope.row.id)" v-if="!scope.row.pid && !scope.row.path">新增子菜单<i class="el-icon-plus"></i></el-button>
+            icon="el-icon-plus"
+            @click="handleAdd(scope.row.id)" v-if="!scope.row.pid && !scope.row.path">新增子菜单</el-button>
         <el-button
             size="mini"
-            @click="handleEdit(scope.row)">编辑<i class="el-icon-edit"></i></el-button>
+            icon="el-icon-edit"
+            @click="handleEdit(scope.row)">编辑</el-button>
 
         <el-popconfirm
             class="ml-5"
@@ -69,7 +72,8 @@
               slot="reference"
               size="mini"
               type="danger"
-          >删除<i class="el-icon-delete"></i></el-button>
+              icon="el-icon-delete"
+          >删除</el-button>
         </el-popconfirm>
       </template>
     </el-table-column>
@@ -89,6 +93,9 @@
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="顺序">
+          <el-input v-model="form.sortNum" autocomplete="off"></el-input>
+        </el-form-item>
       <el-form-item label="描述"> <el-input v-model="form.description" autocomplete="off"></el-input></el-form-item>
 
     </el-form>
@@ -105,6 +112,8 @@ export default {
   name: "Menu",
   data() {
     return {
+      // 非多个禁用
+      multiple: true,
       tableData: [],
       total:0,
       pageNum:1,
@@ -148,8 +157,8 @@ export default {
           "name":this.name
         }
       }).then(res => {
-        console.log("获取的数据")
-        console.log(res.data)
+        // console.log("获取的数据")
+        // console.log(res.data)
         this.tableData = res.data
       })
       //获取图标数据
@@ -173,10 +182,13 @@ export default {
     //增加数据
     save(){
       this.request.post("/menu",this.form).then(res=>{
-        console.log("保存数据")
-        console.log(this.form)
         if(res.code ==="200"){
-          this.$message.success("保存成功")
+          this.$notify({
+            title: '成功',
+            message: '重登生效',
+            type: 'success',
+            duration: 2000
+          })
           this.dialogFormVisible=false
           this.load()
         }else{
@@ -207,6 +219,7 @@ export default {
     //多选
     handleSelectionChange(val){
       this.multipleSelection=val
+      this.multiple = !val.length
     },
     //批量删除
     delBatch(){

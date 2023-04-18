@@ -19,7 +19,7 @@
           title="您确定批量删除这些数据吗？"
           @confirm="delBatch"
       >
-        <el-button type="danger" slot="reference">批量删除 <i class="el-icon-remove-outline"></i></el-button>
+        <el-button type="danger" slot="reference" :disabled="multiple" >批量删除 <i class="el-icon-remove-outline"></i></el-button>
       </el-popconfirm>
 
     </div>
@@ -57,7 +57,7 @@
               title="您确定删除吗？"
               @confirm="del(scope.row.id)"
           >
-            <el-button type="danger" slot="reference">删除 <i class="el-icon-remove-outline"></i></el-button>
+            <el-button type="danger" slot="reference" icon="el-icon-remove-outline">删除</el-button>
           </el-popconfirm>
         </template>
       </el-table-column>
@@ -85,6 +85,8 @@ export default {
   name: "File",
   data() {
     return {
+      // 非多个禁用
+      multiple: true,
       serverIp: serverIp,
       tableData: [],
       name: '',
@@ -130,8 +132,8 @@ export default {
       })
     },
     handleSelectionChange(val) {
-      console.log(val)
       this.multipleSelection = val
+      this.multiple = !val.length
     },
     delBatch() {
       let ids = this.multipleSelection.map(v => v.id)  // [{}, {}, {}] => [1,2,3]

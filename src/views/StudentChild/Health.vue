@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" :model="form" label-width="120px">
-      <el-form-item label="姓名">
-        <el-input v-model="form.name" />
+    <el-form ref="form" :model="form" label-width="130px" v-loading="loading">
+      <el-form-item label="姓名" >
+        <el-input v-model="form.name" :disabled="true"/>
       </el-form-item>
       <el-form-item label="学号">
-        <el-input v-model="form.userid" />
+        <el-input v-model="form.username" :disabled="true"/>
       </el-form-item>
       <el-form-item label="当前所在地区">
         <el-cascader
@@ -16,10 +16,6 @@
           clearable
         >
         </el-cascader>
-        <!-- <el-select v-model="form.region" placeholder="please select your zone">
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select> -->
       </el-form-item>
       <!-- <el-form-item label="时间">
         <el-col :span="11">
@@ -41,10 +37,10 @@
         </el-col>
       </el-form-item> -->
       <el-form-item label="是否发烧">
-        <el-switch v-model="form.hot" />
+        <el-switch v-model="form.isFever" />
       </el-form-item>
       <el-form-item label="是否经过高危地区">
-        <el-switch v-model="form.gorisk" />
+        <el-switch v-model="form.goRisk" />
       </el-form-item>
       <!-- <el-form-item label="Activity type">
         <el-checkbox-group v-model="form.type">
@@ -55,10 +51,10 @@
         </el-checkbox-group>
       </el-form-item> -->
       <el-form-item label="疫苗针数">
-        <el-radio-group v-model="form.vaccinum">
-          <el-radio label="1针" value="1" />
-          <el-radio label="2针" value="2" />
-          <el-radio label="3针" value="3" />
+        <el-radio-group v-model="form.vaccineCount">
+          <el-radio label="1">1针</el-radio>
+          <el-radio label="2">2针</el-radio>
+          <el-radio label="3">3针</el-radio>
         </el-radio-group>
       </el-form-item>
       <!-- <el-form-item label="Activity form">
@@ -74,50 +70,87 @@
 
 <script>
 import { regionData, CodeToText} from 'element-china-area-data';
-import {sethealth} from '@api/student';
-// import timestampToTime from  "../utils/getTime"; 
-//获取时间
-function timestampToTime(times) {
-    let time = times[1]
-    let mdy = times[0]
-    mdy = mdy.split('/')
-    let month = parseInt(mdy[0]);
-    let day = parseInt(mdy[1]);
-    let year = parseInt(mdy[2])
-    return year + '-' + month + '-' + day + ' ' + time
-}
+import {getCodeAderess, getTextAderess} from "@/utils/getAddress";
+import {sethealth, gethealth} from '@/api/student';
+// import nowTime from  "@/utils/getTime"; 
+
 export default {
   data() {
     return {
+      // 遮罩层
+      loading: false,
+      // 打卡与否
+      sign: false,
       form: {
         name: "",
-        userid: "",
-        region: "",
-        date:"",
-        date1: "", 
-        date2: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: "",
+        username: "",
+        address:'',
+        isFever:'',
+        goRisk:'',
+        date:""
       },
       options: regionData,
       addressSelections:[],
-      address:[] 
+      
     };
   },
+  created(){
+    //后台获取User数据
+    // this.form.name = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).nickname:""
+    this.form.username = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).username:""
+    // let address = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).address:""
+    //地址映射,获得区域码 数组
+    // this.addressSelections = getCodeAderess(address);
+    //获取中文地址
+    // this.form.address = getTextAderess(this.addressSelections);
+    this.gethealth();
+  
+  },
   methods: {
-    onSubmit() { 
-        let time = new Date()
-        let nowTime =  timestampToTime(time.toLocaleString('en-US',{hour12: false}).split(" "))
-        this.form.date = nowTime
-        console.log(this.$format(new Date()))
-        //使用对象解构 根据区域码获取具体的地区名
-        const {0: province, 1: city, 2: town} = this.addressSelections.map(code => CodeToText[code]);
-        this.address = { province, city, town };
-        // console.log(this.form);
-        sethealth(form)
+    // 获取表单信息
+    async gethealth() {
+      const  res  = await gethealth(this.$store.state.username);
+      if(res.code === "200"){
+        this.form = res.data
+        //地址映射,获得区域码 数组
+        this.addressSelections = getCodeAderess(res.data.address);
+        this.form.name = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).nickname:""
+        
+        
+        
+      }else{
+        this.$message.warning("未打卡，请及时打卡")
+      }
+      //判断是否打卡
+      // if (!res) return;
+      // else {
+      //   this.isdaka = true;
+      //   this.form = res;
+      // }
+    },
+
+    // 提交打卡信息
+    async onSubmit() {
+      const nowdate = this.parseTime(new Date(),'{y}-{m}-{d}')
+      const olddate = this.parseTime(this.form.punchDate,'{y}-{m}-{d}')
+      // console.log('当前时间：',nowdate);
+      // console.log('数据库转化时间：',olddate);
+      // console.log('数据库时间：',this.form.punchDate);
+      if(olddate === nowdate){
+          this.sign = true
+      }
+      if(this.sign){
+        this.$modal.notifyWarning("今日已打卡，无需再次提交！")
+      } else{
+        this.loading = true;
+        //获取中文地址
+        this.form.address = getTextAderess(this.addressSelections);
+        this.form.punchDate = this.parseTime(new Date(),'{y}-{m}-{d} {h}:{i}:{s}')
+        // console.log('提交时间',this.form.punchDate);
+        await sethealth(this.form);
+        this.loading = false;
         this.$message.success("提交成功");
+    }
     },
     onCancel() {
       this.$message({
@@ -130,6 +163,9 @@ export default {
 </script>
 
 <style scoped>
+.app-container {
+  margin: 0 800px 0 30px;
+}
 .line {
   text-align: center;
 }

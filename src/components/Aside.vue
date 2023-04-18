@@ -6,6 +6,7 @@
            :collapse-transition="false"
            :collapse="isCollapse"
            router
+           :default-active="$route.path"
   >
     <!--图标logo-->
     <div style="height:60px;line-height: 60px;text-align:center">

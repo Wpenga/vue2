@@ -11,7 +11,7 @@
   </div>
 
   <div style="margin:10px 0">
-    <el-button class="ml-5" type="primary" @click="handleAdd">新增<i class="el-icon-circle-plus-outline"></i> </el-button>
+    <el-button class="ml-5" type="primary" icon="el-icon-circle-plus-outline"  @click="handleAdd">新增</el-button>
     <el-popconfirm
         class="ml-5"
         confirm-button-text='好的'
@@ -21,7 +21,7 @@
         title="您确定批量删除这些数据吗？"
         @confirm="delBatch"
     >
-      <el-button class="ml-5" type="danger" slot="reference">批量删除<i class="el-icon-remove-outline"></i> </el-button>
+      <el-button class="ml-5" type="danger" slot="reference" icon="el-icon-remove-outline" :disabled="multiple" >批量删除 </el-button>
     </el-popconfirm>
   </div>
 
@@ -39,10 +39,12 @@
         <el-button
             type="info"
             size="mini"
-            @click="selectMenu(scope.row)">分配菜单<i class="el-icon-menu"></i></el-button>
+            icon="el-icon-menu"
+            @click="selectMenu(scope.row)">分配菜单</el-button>
         <el-button
             size="mini"
-            @click="handleEdit(scope.row)">编辑<i class="el-icon-edit"></i></el-button>
+            icon="el-icon-edit"
+            @click="handleEdit(scope.row)">编辑</el-button>
 
         <el-popconfirm
             class="ml-5"
@@ -57,7 +59,8 @@
               slot="reference"
               size="mini"
               type="danger"
-          >删除<i class="el-icon-delete"></i></el-button>
+              icon="el-icon-delete"
+          >删除</el-button>
         </el-popconfirm>
       </template>
     </el-table-column>
@@ -104,7 +107,7 @@
         :data="menuData"
         show-checkbox>
       <!--图标-->
-      <span class="custom-tree-node" slot-scope="{ node, data }">
+      <span class="custom-tree-node" slot-scope="{  data }">
         <span><i :class="data.icon"/>{{ data.name }}</span>
       </span>
     </el-tree>
@@ -122,6 +125,8 @@ export default {
   data() {
 
     return {
+      // 非多个禁用
+      multiple: true,
       tableData: [],
       total:0,
       pageNum:1,
@@ -240,6 +245,7 @@ export default {
     //多选
     handleSelectionChange(val){
       this.multipleSelection=val
+      this.multiple = !val.length
     },
     //批量删除
     delBatch(){
@@ -284,13 +290,19 @@ export default {
     saveRoleMenu(){
       this.request.post("/role/roleMenu/" + this.roleId, this.$refs.tree.getCheckedKeys()).then(res=>{
         if (res.code === '200') {
-          this.$message.success("绑定成功")
+          // this.$message.success("绑定成功")
           this.menuDialogVis = false
 
           // 操作管理员角色后需要重新登录
           if (this.roleFlag === 'ROLE_ADMIN') {
-            this.$message.success("重登生效")
-            // this.$store.commit("logout")
+              this.$notify({
+                title: '绑定成功',
+                message: '重登生效',
+                type: 'success',
+                duration: 2000
+            })
+          }else{
+            this.$message.success("绑定成功")
           }
 
         } else {
