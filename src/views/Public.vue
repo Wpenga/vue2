@@ -1,100 +1,58 @@
 <template>
   <div>
-<!--    <template>-->
-<!--    <el-row :gutter="20">-->
-<!--      <el-col :span="6">-->
-<!--        <div class="grid-content bg-purple1">-->
-<!--          <div class="main-content">-->
-<!--            <div class="left">-->
-<!--              <span class="top">{{this.count.fever}}</span>-->
-<!--              <span class="bottom">发烧人数</span>-->
-<!--            </div>-->
-<!--            <div class="right">-->
-<!--              <i class="el-icon-user-solid"></i>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </el-col>-->
-<!--      <el-col :span="6">-->
-<!--        <div class="grid-content bg-purple2">-->
-<!--          <div class="main-content">-->
-<!--            <div class="left">-->
-<!--              <span class="top">{{this.count.risk}}</span>-->
-<!--              <span class="bottom">经过高危地区人数</span>-->
-<!--            </div>-->
-<!--            <div class="right">-->
-<!--              <i class="el-icon-user-solid"></i>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </el-col>-->
-<!--      <el-col :span="6">-->
-<!--        <div class="grid-content bg-purple3">-->
-<!--          <div class="main-content">-->
-<!--            <div class="left">-->
-<!--              <span class="top">{{this.count.fill}}</span>-->
-<!--              <span class="bottom">今日填报人数</span>-->
-<!--            </div>-->
-<!--            <div class="right">-->
-<!--              <i class="el-icon-user-solid"></i>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </el-col>-->
-<!--      <el-col :span="6">-->
-<!--        <div class="grid-content bg-purple4">-->
-<!--          <div class="main-content">-->
-<!--            <div class="left">-->
-<!--              <span class="top">{{this.count.fever}}</span>-->
-<!--              <span class="bottom">核酸检测人数</span>-->
-<!--            </div>-->
-<!--            <div class="right">-->
-<!--              <i class="el-icon-user-solid"></i>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </el-col>-->
-<!--    </el-row>-->
-<!--</template>-->
-    <!--签到情况-->
+    <!--疫情情况-->
     <div>
       <el-row :gutter="10" style="margin-bottom: 40px">
         <el-col :span="6">
           <el-card style="color: #409EFF;">
-            <div style="font-weight: bolder"><i class="el-icon-user-solid"></i>用户总数</div>
-            <div style="padding:10px 0; text-align: center;font-weight: bold">100</div>
+            <div style="font-weight: bolder"><i class="el-icon-warning"></i>全球累计确诊人数</div>
+            <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.gntotal}}</div>
           </el-card>
         </el-col>
         <el-col :span="6">
           <el-card style="color: #67C23A;">
-            <div style="font-weight: bolder"><i class=""></i>发烧人数</div>
-            <div style="padding:10px 0; text-align: center;font-weight: bold">1000</div>
+            <div style="font-weight: bolder"><i class="el-icon-user-solid"></i>全球累计治愈人数</div>
+            <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.curetotal}}</div>
           </el-card>
         </el-col>
         <el-col :span="6">
           <el-card style="color: #E6A23C;">
-            <div style="font-weight: bolder"><i class="el-icon-success"></i>已签到</div>
-            <div style="padding:10px 0; text-align: center;font-weight: bold">10</div>
+            <div style="font-weight: bolder"><i class="el-icon-message-solid"></i>全球现有确诊人数</div>
+            <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.econNum}}</div>
           </el-card>
         </el-col>
         <el-col :span="6">
           <el-card style="color: #F56C6C;">
-            <div style="font-weight: bolder"><i class="el-icon-error"></i>未签到</div>
-            <div style="padding:10px 0; text-align: center;font-weight: bold">10</div>
+            <div style="font-weight: bolder"><i class="el-icon-location"></i>境外输入人数</div>
+            <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.jwsrNum}}</div>
           </el-card>
         </el-col>
       </el-row>
     </div>
     <div class="yq">
       <!-- 疫情地图 -->
-      <div class="" >
-        <!-- 初始化echarts需要个 有宽高的 盒子 -->
+      <div>
+        <!-- 初始化echarts 设定地图占位大小 -->
         <div ref='mapbox' style='height:400px;width:600px'></div>
       </div>
+      <!-- 列表 -->
+    <div >
+      <el-col style="margin-bottom: 10px;">
+        <span style="line-height:28px">省份 </span>
+          <el-select v-model="province" placeholder="请选择" clearable  filterable @change="getList">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+      </el-col>
 
       <el-table max-height='400' stripe
                 :cell-style="setRowStyle"
                 :data="tableData"
+                :loading="loading"
                 style="width: 100%">
         <el-table-column
             prop="city"
@@ -116,9 +74,8 @@
             label="现有确诊">
         </el-table-column>
       </el-table>
-
-
     </div>
+</div>
 
   </div>
 </template>
@@ -126,15 +83,14 @@
 <script>
 // import {getUserfever,gorisk,getfill} from '../api/user'
 import * as echarts from 'echarts'
-//  import '../../../node_modules/echarts/map/js/china.js'
-import '@/utils/china.js'
+import '@/utils/china.js'  //地图
 import jsonp from 'jsonp'
-
+import { regionData,CodeToText,TextToCode} from 'element-china-area-data';
 const option = {
   title:{
     text:"全国疫情概览",
     // link:"https://blog.csdn.net/image_fzx",
-    // subtext:"疫情期间找工作---work hard!!!!",
+    subtext:"时间",
     // sublink:"https://blog.csdn.net/image_fzx"
   },
 // ----------   series：地图数据可视化，添加data数据    ---------------------
@@ -211,11 +167,22 @@ const option = {
 export default {
   data () {
     return {
+      loading:false,
       count:{
         fever:'',
         risk:'',
         fill:''
       },
+      form:{
+          times:"",     //统计时间点
+          gntotal:"",   //全球累计确诊人数
+          curetotal:"", //全球累计治愈人数
+          econNum:"",   //全球现有确诊人数
+          jwsrNum:""    //境外输入人数
+      },
+      alldata:{},
+      province:TextToCode['广东省'].code,
+      options:regionData,
       tableHeight:100,
       tableData: []
     }
@@ -253,29 +220,56 @@ export default {
     getData(){
       jsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json?_=1580892522427',{},(err,data)=>{
         if(!err){
-          let arr=[]         // 代表请求数据成功
-          const guangdong = data.data.list.find(item => item.name === "广东");
-          // const res =data.data.list[11].city //拿到福建省各市区的数据
-          const res = guangdong.city //拿到广东省各市区的数据
-          res.map(item=>{
-            let obj={
-              city:item.name,
-              addConfirm:item.conNum,
-              confirm:item.econNum,
-              addheal:item.cureNum
-            }
-            arr.push(obj)
-          })
-          this.tableData=arr
-
+          this.alldata = data.data
+          const { times, gntotal, curetotal, econNum, jwsrNum } = data.data;
+          this.form = { times, gntotal, curetotal, econNum, jwsrNum };
+          // let arr=[]         
+          // // const guangdong = data.data.list.find(item => item.name === "广东");
+          // const province = data.data.list.find(item => item.name === this.province.slice(0,-1));
+          // const res = province.city //拿到省各市区的数据
+          // res.map(item=>{
+          //   let obj={
+          //     city:item.name,
+          //     addConfirm:item.conNum,  //累计确诊
+          //     confirm:item.econNum,    //现有确诊
+          //     addheal:item.cureNum     //累计治愈
+          //   }
+          //   arr.push(obj)
+          // })
+          // this.tableData=arr
+          this.getList(this.province)
           let list = data.data.list.map(item=>({name:item.name,value:item.value}))
-
+          option.title.subtext = this.form.times
           option.series[0].data = list;
           this.mychart.setOption(option);
           // 这行代码能执行的前提是 DOM已经渲染完成，只有DOM渲染完成才能够执行 echarts初始化
         }
       })
-    }
+    },
+    
+    //获取省份数据
+    getList(selectedValue){
+        if(selectedValue){   //判断有值才搜索
+          this.loading = true;
+          //获取中文地址
+          let addressText = CodeToText[selectedValue];
+          let arr=[]         
+          // const guangdong = data.data.list.find(item => item.name === "广东");
+          const province = this.alldata.list.find(item => item.name === addressText.slice(0,-1));
+          const res = province.city //拿到省各市区的数据
+          res.map(item=>{
+            let obj={
+              city:item.name,
+              addConfirm:item.conNum,  //累计确诊
+              confirm:item.econNum,    //现有确诊
+              addheal:item.cureNum     //累计治愈
+            }
+            arr.push(obj)
+          })
+          this.tableData=arr
+          this.loading = false
+        }
+      }
   },
 }
 </script>

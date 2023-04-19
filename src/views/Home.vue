@@ -4,25 +4,25 @@
       <el-col :span="6">
         <el-card style="color: #409EFF;">
           <div style="font-weight: bolder"><i class="el-icon-user-solid"></i>用户总数</div>
-          <div style="padding:10px 0; text-align: center;font-weight: bold">100</div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card style="color: #67C23A;">
-          <div style="font-weight: bolder"><i class=""></i>测试</div>
-          <div style="padding:10px 0; text-align: center;font-weight: bold">1000</div>
+          <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.total}}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card style="color: #E6A23C;">
+          <div style="font-weight: bolder"><i class="el-icon-warning"></i>发烧人数</div>
+          <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.isFeverCount}}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card style="color: #67C23A;">
           <div style="font-weight: bolder"><i class="el-icon-success"></i>已签到</div>
-          <div style="padding:10px 0; text-align: center;font-weight: bold">10</div>
+          <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.signCount}}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card style="color: #F56C6C;">
           <div style="font-weight: bolder"><i class="el-icon-error"></i>未签到</div>
-          <div style="padding:10px 0; text-align: center;font-weight: bold">10</div>
+          <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.total - form.signCount}}</div>
         </el-card>
       </el-col>
     </el-row>
@@ -42,11 +42,27 @@
 
 <script>
 import * as echarts from 'echarts';
-
+import { getdata} from "@/api/echarts";
 export default {
   name: "Home",
   data(){
-    return {}
+    return {
+      xAxisData:['0-6','6-12','12-18','18-24'],
+      form:{ 
+        total:0,      //用户总数
+        signCount:0,  //签到总数
+        isFeverCount:0,    //发烧总数
+      }
+      
+    }
+  },
+  created(){
+    //获取用户
+      this.loading = true ;
+      getdata().then(res => {
+        const {total,signCount,isFeverCount} = res.data
+        this.form = {total,signCount,isFeverCount} 
+      })
   },
   mounted() {//页面元素渲染之后再触发
     var chartDom = document.getElementById('main');
@@ -56,12 +72,12 @@ export default {
     option = {
       title: {
         text: '签到时间分布',
-        subtext: '趋势图',
+        subtext: '折线-柱状图',
         left: 'center'
       },
       xAxis: {
         type: 'category',
-        data: ['第一季度','第二季度','第三季度','第四季度']
+        data: this.xAxisData
       },
       yAxis: {
         type: 'value'
@@ -81,16 +97,16 @@ export default {
           data: [],
           type: 'bar'//柱状图
         },
-        {
-          name:'未签到',
-          data: [],
-          type: 'line'//折线图
-        },
-        {
-          name:'未签到',
-          data: [],
-          type: 'bar'//柱状图
-        }
+        // {
+        //   name:'未签到',
+        //   data: [],
+        //   type: 'line'//折线图
+        // },
+        // {
+        //   name:'未签到',
+        //   data: [],
+        //   type: 'bar'//柱状图
+        // }
       ]
     };
     /*this.request.get("/echarts/example").then(res =>{
@@ -152,20 +168,21 @@ export default {
       ]
     };
     this.request.get("/echarts/members").then(res =>{
+      console.log(res.data);
       //柱状图，折线图
       // option.xAxis.data = res.data
       option.series[0].data = res.data
       option.series[1].data = res.data
-      option.series[2].data = [5,10,14,20]
-      option.series[3].data = [5,10,14,20]
+      // option.series[2].data = [5,10,14,20]
+      // option.series[3].data = [5,10,14,20]
       myChart.setOption(option);
 
       //饼图
       pieoption.series[0].data=[
-        { value: res.data[0], name: '第一季度' },
-        { value: res.data[1], name: '第二季度' },
-        { value: res.data[2], name: '第三季度' },
-        { value: res.data[3], name: '第四季度' }
+        { value: res.data[0], name: '凌晨' },
+        { value: res.data[1], name: '早上' },
+        { value: res.data[2], name: '下午' },
+        { value: res.data[3], name: '晚上' }
       ]
       pieChart.setOption(pieoption)
     })

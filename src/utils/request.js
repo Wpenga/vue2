@@ -1,3 +1,4 @@
+import store from '@/store';
 import axios from 'axios'
 import ElementUI from "element-ui"
 import {serverIp} from "../../public/config";
@@ -44,6 +45,8 @@ request.interceptors.response.use(
         return res;
     },
     error => {
+        // store.commit('logout')
+        console.log("token可能过期")
         console.log('err' + error) // for debug
         return Promise.reject(error)
     }

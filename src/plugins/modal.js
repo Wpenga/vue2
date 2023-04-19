@@ -62,13 +62,26 @@ export default {
   },
   
   // 确认窗体
-  confirm(content) {
-    return MessageBox.confirm(content, "系统提示", {
+  // confirm(content) {
+  //   return MessageBox.confirm(content, "系统提示", {
+  //     confirmButtonText: '确定',
+  //     cancelButtonText: '取消',
+  //     type: "warning",
+  //   })
+  // },
+  confirm(content, needCancelButton = true) {
+    const options = {
       confirmButtonText: '确定',
-      cancelButtonText: '取消',
       type: "warning",
-    })
+    }
+    if(needCancelButton) {
+      options.cancelButtonText = '取消'
+    } else {
+      options.showCancelButton = false
+    }
+    return MessageBox.confirm(content, "系统提示", options)
   },
+  
   // 提交内容
   prompt(content) {
     return MessageBox.prompt(content, "系统提示", {

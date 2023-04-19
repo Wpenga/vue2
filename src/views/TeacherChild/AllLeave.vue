@@ -8,18 +8,18 @@
       v-show="showSearch"
       label-width="68px"
     >
-      <el-form-item label="公告标题" prop="noticeTitle">
+      <el-form-item label="学号" prop="username">
         <el-input
-          v-model="queryParams.noticeTitle"
-          placeholder="请输入公告标题"
+          v-model="queryParams.username"
+          placeholder="请输入学号"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="创建者" prop="createBy">
+      <el-form-item label="姓名" prop="nickname">
         <el-input
-          v-model="queryParams.createBy"
-          placeholder="请输入创建者"
+          v-model="queryParams.nickname"
+          placeholder="请输入姓名"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -40,7 +40,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8" style="padding: 10px 0">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="primary"
           plain
@@ -49,7 +49,7 @@
           @click="handleAdd"
           >新增</el-button
         >
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="success"
@@ -76,34 +76,44 @@
 
     <el-table
       v-loading="loading"
-      :data="noticeList"
+      :data="LeaveList"
       stripe
       border
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="请假ID" align="center" prop="noticeId" />
-      <el-table-column label="申请人" align="center" prop="noticeTitle" />
-      <!-- <el-table-column label="公告类型" align="center" prop="noticeType" /> -->
-      <el-table-column label="公告内容" align="center" prop="noticeContent" />
+      <el-table-column label="请假ID" align="center" prop="leaveId" />
+      <el-table-column label="学号" align="center" prop="username" />
+      <el-table-column label="申请人" align="center" prop="nickname" />
+      <el-table-column label="联系方式" align="center" prop="phone" />
+      <!-- <el-table-column label="公告类型" align="center" prop="LeaveType" /> -->
+      <el-table-column label="请假原因" align="center" prop="reason" />
+      <el-table-column prop="startTime" label="请假时间" align="center" > 
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="endTime" label="结束时间" align="center" > 
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="applyTime" label="申请时间" align="center" > 
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.applyTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <!-- <el-table-column label="状态" align="center" prop="status" /> -->
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column prop="status" label="审批状态" align="center" >
         <template slot-scope="scope">
-          <el-tag type="primary" v-if="scope.row.status === '1'">正常</el-tag>
-          <el-tag type="warning" v-if="scope.row.status === '0'">关闭</el-tag>
+          <!-- <el-button )">{ -->
+          <!-- <el-tag :type="renderStatus(scope.row.status).type" >{{renderStatus(scope.row.status).label}}</el-tag> -->
+          <el-tag :type="renderStatus(scope.row).type">{{
+            renderStatus(scope.row).label
+          }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="创建者" align="center" prop="createBy" />
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        width="100"
-      >
-        <template slot-scope="scope">
-          <span>{{ getdate(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
+      
       <el-table-column
         label="操作"
         align="center"
@@ -113,16 +123,18 @@
           <el-button
             size="mini"
             type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            >修改</el-button
+            icon="el-icon-check"
+            @click="approval(scope.row,true)"
+            :disabled="scope.row.status == 1"
+            >批准</el-button
           >
           <el-button
             size="mini"
             type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            >删除</el-button
+            icon="el-icon-close"
+            @click="approval(scope.row,false)"
+            :disabled="scope.row.status == 2"
+            >驳回</el-button
           >
         </template>
       </el-table-column>
@@ -136,50 +148,21 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改通知公告对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="公告标题" prop="noticeTitle">
-          <el-input v-model="form.noticeTitle" placeholder="请输入公告标题" />
-        </el-form-item>
-        <!-- <el-col :span="24"> -->
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.status">
-            <el-radio
-              v-for="dict in dicts"
-              :key="dict.value"
-              :label="dict.value"
-              >{{ dict.label }}</el-radio
-            >
-          </el-radio-group>
-        </el-form-item>
-        <!-- </el-col> -->
-        <el-form-item label="公告内容">
-          <editor v-model="form.noticeContent" :min-height="192" />
-        </el-form-item>
-        <!-- <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" placeholder="请输入备注" />
-        </el-form-item> -->
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </div>
-    </el-dialog>
+  
   </div>
 </template>
 
 <script>
 import {
-  listNotice,
-  getNotice,
-  delNotice,
-  addNotice,
-  updateNotice,
-} from "@/api/user";
+  listLeave,
+  getLeave,
+  delLeave,
+  addLeave,
+  updateLeave,
+} from "@/api/teacher/leave";
 
 export default {
-  name: "Notice",
+  name: "Leave",
   data() {
     return {
       // 遮罩层
@@ -195,28 +178,26 @@ export default {
       // 总条数
       total: 0,
       // 通知公告表格数据
-      noticeList: [],
+      LeaveList: [],
       // 弹出层标题
       title: "",
-      // 是否显示弹出层
-      open: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        noticeTitle: null,
-        noticeType: null,
-        noticeContent: null,
+        LeaveTitle: null,
+        LeaveType: null,
+        LeaveContent: null,
         status: null,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-        noticeTitle: [
+        LeaveTitle: [
           { required: true, message: "公告标题不能为空", trigger: "blur" },
         ],
-        noticeType: [
+        LeaveType: [
           { required: true, message: "公告类型不能为空", trigger: "change" },
         ],
       },
@@ -230,6 +211,32 @@ export default {
     this.getList();
   },
   methods: {
+    renderStatus(row) {
+      const { status: status } = row || {};
+
+      const STATUS_ENUM = {
+        NoAllow: {
+          value: "0",
+          label: "未批准",
+          type: "info",
+        },
+        Allow: {
+          value: "1",
+          label: "已批准",
+          type: "success",
+        },
+        Opposition: {
+          value: "2",
+          label: "已驳回",
+          type: "danger",
+        },
+      };
+      let tag = {};
+      Object.values(STATUS_ENUM).map((item) => {
+        if (item.value == status) tag = item;
+      });
+      return tag;
+    },
     resetForm(refName) {
       if (this.$refs[refName]) {
         this.$refs[refName].resetFields();
@@ -239,15 +246,25 @@ export default {
     getList() {
       this.loading = false;
       
-      listNotice(this.queryParams).then((res) => {
+      listLeave(this.queryParams).then((res) => {
         // console.log(res.data.records);
-        this.noticeList = res.data.records;
+        this.LeaveList = res.data.records.filter(record => record.status !== -1);;
         this.total = res.data.total;
-        // this.noticeList = response.rows;
+        // this.LeaveList = response.rows;
         // this.total = response.total;
         this.loading = false;
       });
     },
+    //审批
+    approval(row,bool){
+      row.status = bool ? 1 : 2;
+      const msg = bool ? '同意请假' : '驳回请假';
+      updateLeave(row).then(() => {
+        this.$modal[bool ? 'msgSuccess' : 'msgWarning'](msg);
+        this.getList();
+      });
+    },
+
     // 取消按钮
     cancel() {
       this.open = false;
@@ -256,10 +273,10 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        noticeId: null,
-        noticeTitle: null,
-        noticeType: null,
-        noticeContent: null,
+        leaveId: null,
+        LeaveTitle: null,
+        LeaveType: null,
+        LeaveContent: null,
         status: null,
         createBy: null,
         createTime: null,
@@ -281,7 +298,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map((item) => item.noticeId);
+      this.ids = selection.map((item) => item.leaveId);
       this.single = selection.length !== 1;
       this.multiple = !selection.length;
     },
@@ -293,14 +310,9 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-        // if(this.form.status === this.dicts[0].value){
-    //   console.log('测试'+this.form.status);
-    //   console.log(this.dicts[0].value);
-    //   this.form.status = this.dicts[0].value
-    //   console.log('测试'+this.form.status);
       this.reset();
-      const noticeId = row.noticeId || this.ids;
-      getNotice(noticeId).then((response) => {
+      const leaveId = row.leaveId || this.ids;
+      getLeave(leaveId).then((response) => {
         this.form = response.data;
         // this.form.status = this.dicts[0].value
         console.log('测试'+this.form.status);
@@ -312,15 +324,15 @@ export default {
     submitForm() {
       this.$refs["form"].validate((valid) => {
         if (valid) {
-          if (this.form.noticeId != null) {
-            updateNotice(this.form).then((response) => {
+          if (this.form.leaveId != null) {
+            updateLeave(this.form).then((response) => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
             this.form.createBy = this.$store.state.nickname;
-            addNotice(this.form).then((response) => {
+            addLeave(this.form).then((response) => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -332,12 +344,12 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       console.log(row);
-      const noticeIds=  row.noticeId ? [row.noticeId] : this.ids
-      // const noticeIds = row.noticeId || this.ids;
+      const leaveIds=  row.leaveId ? [row.leaveId] : this.ids
+      // const leaveIds = row.leaveId || this.ids;
       this.$modal
-        .confirm('是否确认删除通知公告编号为"' + noticeIds + '"的数据项？')
+        .confirm('是否确认删除通知公告编号为"' + leaveIds + '"的数据项？')
         .then(function () {
-          return delNotice(noticeIds);
+          return delLeave(leaveIds);
         })
         .then(() => {
           this.getList();

@@ -9,12 +9,10 @@
     >
     <!-- 表格 -->
     <el-table :data="getLeaveData" border style="width: 100%">
-      <el-table-column prop="username" label="学号" width="180">
-      </el-table-column>
+      <!-- <el-table-column prop="username" label="学号" width="180"> -->
+      <!-- </el-table-column> -->
       <!-- <el-table-column prop="nickname" label="姓名" width="180"> -->
-      <el-table-column label="姓名" width="180">{{
-        this.$store.state.nickname
-      }}</el-table-column>
+      <!-- <el-table-column prop="nickname" label="姓名" width="180"></el-table-column> -->
       <!-- </el-table-column> -->
       <el-table-column prop="reason" label="请假原因"> </el-table-column>
       
@@ -33,7 +31,7 @@
           <span>{{ parseTime(scope.row.applyTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="审批状态" ref="statusColumn">
+      <el-table-column prop="status" label="审批状态">
         <template slot-scope="scope">
           <!-- <el-button )">{ -->
           <!-- <el-tag :type="renderStatus(scope.row.status).type" >{{renderStatus(scope.row.status).label}}</el-tag> -->
@@ -43,6 +41,30 @@
         </template>
       </el-table-column>
       <!-- <el-table-column prop="classes" label="班级"> </el-table-column> -->
+      <el-table-column
+        label="操作"
+        align="center"
+        class-name="small-padding fixed-width"
+      >
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="handleUpdate(scope.row)"
+            :disabled="scope.row.status != 0 && scope.row.status !=-1"
+            >修改</el-button
+          >
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-delete"
+            @click="handleCancel(scope.row)"
+           :disabled="scope.row.status != 0"
+            >撤回</el-button
+          >
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 请假表单 -->
@@ -117,7 +139,7 @@
 </template>
 
 <script>
-import { getmyLeave, setLeave } from "@/api/student";
+import { getmyLeave, setLeave ,getmyLeaveById,updateLeave} from "@/api/student";
 // import { STATUS_ENUM } from "./constant";
 export default {
   data() {
@@ -128,7 +150,7 @@ export default {
       Time:'',
       // 请假单数据
       form: {
-        username:this.$store.state.username,
+        username:JSON.parse(localStorage.getItem("user")).username,
         reason: "",
         // college: "",
         // grade: "",
@@ -166,6 +188,11 @@ export default {
           label: "已驳回",
           type: "danger",
         },
+        Cancel: {
+          value: "-1",
+          label: "已撤销",
+          type: "warning",
+        },
       };
       let tag = {};
       Object.values(STATUS_ENUM).map((item) => {
@@ -175,27 +202,36 @@ export default {
     },
     // 获取个人请假表
     async getleaveform() {
-      const res = await getmyLeave(this.$store.state.username);
-     
+      const res = await getmyLeave(JSON.parse(localStorage.getItem("user")).username);
       this.getLeaveData = res.data;
-      // this.getLeaveData = [
-      //   {
-      //   "username":'1',
-      //   "nickname":"涛哥",
-      //   "reason":"生病",
-      //   "startime":'2020',
-      //   "endtime":"2020",
-      //   "status":"1"
-      // }]
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row) {
+      const leaveId = row.leaveId;
+      getmyLeaveById(leaveId).then((res) => {
+        this.form = res.data;
+        this.Time = [res.data.startTime,res.data.endTime ]
+        // this.form.status = this.dicts[0].value
+        this.dialogVisible = true;
+        this.title = "修改请假信息";
+      });
+    },
+    //撤回申请
+    handleCancel(row){
+      console.log(row.status);
+      row.status = -1;
+      updateLeave(row).then(() => {
+        this.$modal.notifySuccess("撤回成功,若需重新提交修改即可");
+      });
     },
     // 提交请假表
     async submit() {
-      console.log(this.form);
       this.dialogVisible = false;
       [this.form.startTime,this.form.endTime ]= this.Time
       // const { reason, grade, college, date1, date2 } = this.form;
       this.form.startTime = this.parseTime(this.form.startTime, "{y}-{m}-{d} {h}:{i}:{s}");
       this.form.endTime = this.parseTime(this.form.endTime,"{y}-{m}-{d} {h}:{i}:{s}");
+      this.form.status=0
       await setLeave(this.form).then(res =>{
           if(res.code ==="200"){
             this.$message.success("提交成功")
@@ -205,8 +241,6 @@ export default {
       }).catch(err =>{
         this.$message.error("系统错误，稍候重试");
       })
-      
-      
       this.getleaveform();
     },
   },

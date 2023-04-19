@@ -46,32 +46,33 @@ export default {
 
   methods: {
     onLogin(user) {
+      this.loading = true
       // 处理登录逻辑
       // this.$refs[user].validate(async (valid) => {
         this.$refs[user].validate((valid) => {
         if (valid) {//表单校验合法
             // const res = await login(this.user)
             // const res = 
-            this.$store.dispatch('login',this.user).then(()=>{
-          // this.request.post("/user/login",this.user).then(res=>{
+            // this.$store.dispatch('login',this.user).then(()=>{
+          login(this.user).then(res=>{
           
             // res = res.data
-            // if(res.code === "200"){
+            if(res.code === "200"){
+              this.loading = false
               //存储数据 包含用户名，密码，昵称，图片url
-            //   localStorage.setItem("user",JSON.stringify(res.data))
-            //   localStorage.setItem("menus",JSON.stringify(res.data.menus))
-              // this.$store.dispatch("login")
-              // this.$store.commit("setName",res.data.nickname)
+              // localStorage.setItem("user",JSON.stringify(res.data))
+              // localStorage.setItem("menus",JSON.stringify(res.data.menus))
+              this.$store.dispatch("login",res.data)
               //设置当前路由
               setRoutes()
               this.$message.success("登录成功")
               this.$router.push("/")
 
-            // }else if(res.code=="500"){
-            //   this.$message.error("系统错误")
-            // }else if(res.code=="600"){
-            //   this.$message.error("用户名或密码错误")
-            // }
+            }else if(res.code=="500"){
+              this.$message.error("系统错误")
+            }else if(res.code=="600"){
+              this.$message.error("用户名或密码错误")
+            }
           })
         } else {
           console.log('error submit!!');

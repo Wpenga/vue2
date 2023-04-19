@@ -79,14 +79,8 @@ export default {
           }
           this.request.post("/user/password", this.form).then(res => {
             if (res.code === '200') {
-               this.$modal.prompt('修改成功，请重新登录').then(function() {
-                  return this.$store.commit("logout")
-                }).then((res) => {
-                  this.$message.success("退出成功")
-                    
-              }).catch(() => {});
-              // this.$message.success("修改成功")
-             
+              this.$modal.notifySuccess("修改成功，请重新登录")
+              this.$store.commit("logout")
             } else {
               this.$message.error(res.msg)
             }

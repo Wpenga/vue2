@@ -9,11 +9,11 @@ Vue.use(VueRouter)
 
 const routes = [
 
-  {
-    path: '/about',
-    name: 'about',
-    component: () => import('../views/AboutView.vue')
-  },
+  // {
+  //   path: '/about',
+  //   name: 'about',
+  //   component: () => import('../views/AboutView.vue')
+  // },
   {
     path: '/login',
     name: 'Login',
@@ -52,7 +52,7 @@ export const setRoutes = () => {
   if(storeMenus){
     //获取当前路由对象名称数组
     const  currentRouteNames = router.getRoutes().map(v => v.name)
-    // console.log(router.getRoutes())
+    // console.log(router.getRoutes())~
     if(!currentRouteNames.includes('Manage')){
       const manageRoute = { path: '/', name: 'Manage', component: () => import('../views/Manage.vue'), redirect: "/home", children: [
           { path: 'person', name: '个人信息', component: () => import('../views/Person.vue')},
@@ -103,7 +103,6 @@ setRoutes()
 router.beforeEach((to,from, next)=>{//路由名称
   // 进度条
   NProgress.start()
-  
   localStorage.setItem("currentPathName", to.name)  //设置路由名称
   store.commit("setPath")  ///触发store的数据更新
   // 未找到路由的情况

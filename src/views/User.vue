@@ -14,6 +14,7 @@
           v-model="queryParams.nickname"
           placeholder="请输入姓名"
           clearable
+          @clear="getList"
           @keyup.enter.native="getList"
         />
       </el-form-item>
@@ -155,6 +156,7 @@
         </template>
     </el-table-column>
     <el-table-column prop="phone" label="联系方式" width="120"></el-table-column>
+    <el-table-column prop="email" label="邮箱" width="120"></el-table-column>
     <el-table-column
         prop="sign"
         label="签到状态"
@@ -333,7 +335,10 @@ export default {
     reset(){
       this.username='',
       this.address="",
-      this.queryParams={}
+      this.queryParams={
+        "pageNum":1,
+        "pageSize":10
+      }
       this.getList();
     },
     //新增按钮

@@ -128,13 +128,13 @@
       </el-table-column>
     </el-table>
 
-    <!-- <pagination
+    <pagination
       v-show="total>0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
-    /> -->
+    />
 
     <!-- 添加或修改通知公告对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -155,7 +155,8 @@
         </el-form-item>
         <!-- </el-col> -->
         <el-form-item label="公告内容">
-          <editor v-model="form.noticeContent" :min-height="192" />
+          <el-input v-model="form.noticeContent" :min-height="192" type="textarea" :rows="2"/>
+          <!-- <editor v-model="form.noticeContent" :min-height="192" /> -->
         </el-form-item>
         <!-- <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" placeholder="请输入备注" />
@@ -176,7 +177,7 @@ import {
   delNotice,
   addNotice,
   updateNotice,
-} from "@/api/user";
+} from "@/api/teacher/notice";
 
 export default {
   name: "Notice",
@@ -237,9 +238,8 @@ export default {
     },
     /** 查询通知公告列表 */
     getList() {
-      this.loading = false;
+      this.loading = true;
       listNotice(this.queryParams).then((res) => {
-        // console.log(res.data.records);
         this.noticeList = res.data.records;
         this.total = res.data.total;
         // this.noticeList = response.rows;
@@ -259,7 +259,7 @@ export default {
         noticeTitle: null,
         noticeType: null,
         noticeContent: null,
-        status: null,
+        status: '1',
         createBy: null,
         createTime: null,
         updateBy: null,
@@ -292,17 +292,10 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-        // if(this.form.status === this.dicts[0].value){
-    //   console.log('测试'+this.form.status);
-    //   console.log(this.dicts[0].value);
-    //   this.form.status = this.dicts[0].value
-    //   console.log('测试'+this.form.status);
       this.reset();
       const noticeId = row.noticeId || this.ids;
       getNotice(noticeId).then((response) => {
         this.form = response.data;
-        // this.form.status = this.dicts[0].value
-        console.log('测试'+this.form.status);
         this.open = true;
         this.title = "修改通知公告";
       });
@@ -318,7 +311,7 @@ export default {
               this.getList();
             });
           } else {
-            this.form.createBy = this.$store.state.nickname;
+            this.form.createBy = JSON.parse(localStorage.getItem("user")).nickname;
             addNotice(this.form).then((response) => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;

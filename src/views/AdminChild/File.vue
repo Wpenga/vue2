@@ -79,8 +79,8 @@
 </template>
 
 <script>
-import {serverIp} from "../../public/config";
-
+import {serverIp} from "../../../public/config";
+ 
 export default {
   name: "File",
   data() {

@@ -25,7 +25,22 @@ export function getmyLeave(username) {
 
   });
 }
+//通过Id获取
+export function getmyLeaveById(leaveId) {
+  return request({
+      url: "/leave/"+leaveId,
+      method: "get",
 
+  });
+}
+// 撤销请假
+export function updateLeave(data) {
+  return request({
+    url: '/leave',
+    method: 'post',
+    data: data
+  })
+}
 // 提交请假单
 export function setLeave(data) {
   return request({
@@ -33,4 +48,12 @@ export function setLeave(data) {
       method: "POST",
       data
   });
+}
+
+// 获取发布的通知公告详细
+export function getNoticeOpen() {
+  return request({
+    url: '/notice/open',
+    method: 'get'
+  })
 }
