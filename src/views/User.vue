@@ -157,7 +157,7 @@
     </el-table-column>
     <el-table-column prop="phone" label="联系方式" width="120"></el-table-column>
     <el-table-column prop="email" label="邮箱" width="120"></el-table-column>
-    <el-table-column
+    <!-- <el-table-column
         prop="sign"
         label="签到状态"
         width="100"
@@ -169,7 +169,7 @@
             :type="scope.row.sign === '签到' ? 'primary' : 'success'"
             disable-transitions>{{scope.row.sign || '未签到'}}</el-tag>
       </template>
-    </el-table-column>
+    </el-table-column> -->
 
     <el-table-column prop="address" label="地址">
     </el-table-column>
@@ -319,9 +319,7 @@ export default {
     getList(){
       this.loading = true ;
       listUser(this.queryParams).then(res => {
-      // this.request.get("/user/page",{
-      //   params:this.queryParams
-      // }).then(res => {
+     
         this.tableData = res.data.records
         this.total = res.data.total
         this.loading = false;

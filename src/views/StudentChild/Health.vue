@@ -95,9 +95,9 @@ export default {
     async onSubmit() {
       const nowdate = this.parseTime(new Date(),'{y}-{m}-{d}')
       const olddate = this.parseTime(this.form.punchDate,'{y}-{m}-{d}')
-      console.log('当前时间：',nowdate);
-      console.log('数据库转化时间：',olddate);
-      console.log('数据库时间：',this.form.punchDate);
+      // console.log('当前时间：',nowdate);
+      // console.log('数据库转化时间：',olddate);
+      // console.log('数据库时间：',this.form.punchDate);
       if(olddate === nowdate){
           this.sign = true
       }

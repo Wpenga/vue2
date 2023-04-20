@@ -3,7 +3,7 @@
     <el-row :gutter="10" style="margin-bottom: 40px">
       <el-col :span="6">
         <el-card style="color: #409EFF;">
-          <div style="font-weight: bolder"><i class="el-icon-user-solid"></i>用户总数</div>
+          <div style="font-weight: bolder"><i class="el-icon-user-solid"></i>学生总数</div>
           <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.total}}</div>
         </el-card>
       </el-col>
@@ -121,8 +121,8 @@ export default {
     var pieChart = echarts.init(pieDom);
     var pieoption = {
       title: {
-        text: '饼图',
-        subtext: '比例图',
+        text: '时间分布',
+        subtext: '饼图',
         left: 'center'
       },
       tooltip: {

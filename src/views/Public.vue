@@ -28,8 +28,8 @@
           </el-card>
         </el-col>
       </el-row>
-    </div>
-    <div class="yq">
+  </div>
+    <div class="yq" > 
       <!-- 疫情地图 -->
       <div>
         <!-- 初始化echarts 设定地图占位大小 -->

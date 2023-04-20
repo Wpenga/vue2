@@ -106,8 +106,6 @@
       <!-- <el-table-column label="状态" align="center" prop="status" /> -->
       <el-table-column prop="status" label="审批状态" align="center" >
         <template slot-scope="scope">
-          <!-- <el-button )">{ -->
-          <!-- <el-tag :type="renderStatus(scope.row.status).type" >{{renderStatus(scope.row.status).label}}</el-tag> -->
           <el-tag :type="renderStatus(scope.row).type">{{
             renderStatus(scope.row).label
           }}</el-tag>
