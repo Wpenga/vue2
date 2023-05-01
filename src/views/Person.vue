@@ -22,7 +22,7 @@
         <el-input
           v-model="form.nickname"
           autocomplete="off"
-          disabled
+          
         ></el-input>
       </el-form-item>
       <!-- <el-form-item label="学号">
@@ -70,8 +70,7 @@
 </template>
 
 <script>
-import { regionData } from "element-china-area-data";
-import {getCodeAderess, getTextAderess} from "@/utils/getAddress";
+import {getCodeAddress, getTextAderess} from "@/utils/getAddress";
 import { serverIp } from "../../public/config";
 export default {
   name: "Person",
@@ -91,7 +90,7 @@ export default {
       }
     };
     return {
-      options: regionData,
+      options: this.regionData,
       addressSelections: [],
       serverIp: serverIp,
       form: {},
@@ -116,7 +115,7 @@ export default {
   created() {
     this.getUser().then((res) => {
       //地址映射,获得区域码 数组
-      this.addressSelections = getCodeAderess(res.data.address);
+      this.addressSelections = res.data.address?getCodeAddress(res.data.address):'';
       this.form = res.data;
     });
   },

@@ -51,7 +51,12 @@ export default {
     }
   },
   created(){
-    getNoticeOpen().then((response) => {
+    console.log("测试");
+    let username=''
+    if(JSON.parse(localStorage.getItem("user")).role == "ROLE_STUDENT"){
+      username = JSON.parse(localStorage.getItem("user")).username
+    }
+    getNoticeOpen({username}).then((response) => {
         this.notifications = response.data;
         // this.form.status = this.dicts[0].value
       });

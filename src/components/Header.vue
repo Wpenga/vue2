@@ -21,14 +21,21 @@
       <span>{{ user.nickname }}</span><i class="el-icon-arrow-down" style="margin-left: 5px"></i>
     </div>
     <el-dropdown-menu slot="dropdown" style="width: 100px;text-align: center;">
-      <el-dropdown-item style="font-size: 14px;padding: 5px 0">
-        <router-link to="/person" style="text-decoration: none">个人信息</router-link>
+      <el-dropdown-item style="font-size: 14px;padding: 5px 0"  @click.native="toPage(1)">
+        <!-- <router-link to="/person" style="text-decoration: none" @click.native="$emit('click')"> -->
+        个人信息
+        <!-- </router-link> -->
       </el-dropdown-item>
-      <el-dropdown-item style="font-size: 14px; padding: 5px 0">
-          <router-link to="/password" style="text-decoration: none">修改密码</router-link>
+      <el-dropdown-item style="font-size: 14px; padding: 5px 0" @click.native="toPage(2)">
+          <!-- <router-link to="/password" style="text-decoration: none"  > -->
+          修改密码
+          <!-- </router-link> -->
         </el-dropdown-item>
-      <el-dropdown-item style="font-size: 14px;padding: 5px 0">
-        <span  style="text-decoration: none" @click="logout">退出</span>
+      <el-dropdown-item style="font-size: 14px;padding: 5px 0" @click.native="logout">
+        <!-- <div  style="text-decoration: none" @click="logout"> -->
+          退出
+
+        <!-- </div> -->
       </el-dropdown-item>
     </el-dropdown-menu>
   </el-dropdown>
@@ -51,9 +58,16 @@ export default {
   methods:{
     logout(){//退出登录
       this.$store.commit("logout")
-      // this.$router.push("/login")
-      // localStorage.removeItem("user") //清楚登录数据
       this.$message.success("退出成功")
+    },
+    toPage(val){
+      const toPath = val === 1 ? '/person' : '/password'
+      const path = this.$route.path// 返回当前路由的路径
+      if (path === toPath) {
+          // 当前路由已经是 topath 页面，则不用再次跳转
+          return
+        }
+        this.$router.push(toPath)
     }
   },
   computed:{

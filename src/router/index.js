@@ -104,6 +104,7 @@ router.beforeEach((to,from, next)=>{//路由名称
   // 进度条
   NProgress.start()
   localStorage.setItem("currentPathName", to.name)  //设置路由名称
+  // store.commit("setUsername",JSON.parse(localStorage.getItem("user")).username)
   store.commit("setPath")  ///触发store的数据更新
   // 未找到路由的情况
   if (!to.matched.length) {

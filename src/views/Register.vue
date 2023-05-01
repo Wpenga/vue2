@@ -1,5 +1,6 @@
 <template>
   <div class="wrapper">
+    <div class="title">校园疫情防控系统</div>
     <div class="windows">
       <div style="margin: 20px 0;text-align: center;font-size: 24px">登录</div>
       <el-form :label-position="labelPosition" ref="user" label-width="100px" :model="user" :rules="rules">
@@ -57,7 +58,7 @@ export default {
           this.request.post("/user/register",this.user).then(res=>{
             if(res.code==="200"){
               this.$message.success("注册成功")
-              // this.$router.push("/login")
+              this.$router.push("/login")
             }else{
               this.$message.error(res.msg)
             }
@@ -80,6 +81,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .windows {
@@ -103,5 +105,16 @@ export default {
 
 .btn el-button:first-child {
   margin-right: 10px;
+}
+
+.title {
+  
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 50px;
+  color: #ffffff;
+  margin-top: 10px;
+  margin-bottom: 30px;
 }
 </style>

@@ -1,6 +1,6 @@
 import { TextToCode,CodeToText} from 'element-china-area-data';
 //区域码
-export function getCodeAderess(address){
+export function getCodeAddress(address){
     let arraddress = address.split(" ");
     let province = TextToCode[arraddress[0]].code;
     let city = TextToCode[arraddress[0]][arraddress[1]].code;

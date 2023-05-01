@@ -51,9 +51,10 @@ export function setLeave(data) {
 }
 
 // 获取发布的通知公告详细
-export function getNoticeOpen() {
+export function getNoticeOpen(username) {
   return request({
     url: '/notice/open',
-    method: 'get'
+    method: 'get',
+    params: username
   })
 }

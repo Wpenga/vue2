@@ -168,7 +168,7 @@ export default {
       ]
     };
     this.request.get("/echarts/members").then(res =>{
-      console.log(res.data);
+      // console.log(res.data);
       //柱状图，折线图
       // option.xAxis.data = res.data
       option.series[0].data = res.data

@@ -82,12 +82,16 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="请假ID" align="center" prop="leaveId" />
+      <el-table-column label="请假ID" align="center" prop="leaveId" width="60"/>
       <el-table-column label="学号" align="center" prop="username" />
       <el-table-column label="申请人" align="center" prop="nickname" />
       <el-table-column label="联系方式" align="center" prop="phone" />
-      <!-- <el-table-column label="公告类型" align="center" prop="LeaveType" /> -->
-      <el-table-column label="请假原因" align="center" prop="reason" />
+      <el-table-column label="请假类型" align="center" prop="type" width="80">
+        <template slot-scope="scope">
+          <el-tag :type="tagType(scope.row.type)">{{scope.row.type}}</el-tag>
+        </template>
+      </el-table-column> 
+      <el-table-column label="详细原因" align="center" prop="reason" />
       <el-table-column prop="startTime" label="请假时间" align="center" > 
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
@@ -116,6 +120,7 @@
         label="操作"
         align="center"
         class-name="small-padding fixed-width"
+        width="150"
       >
         <template slot-scope="scope">
           <el-button
@@ -209,6 +214,9 @@ export default {
     this.getList();
   },
   methods: {
+    tagType(type){
+      return type === "事假" ? 'primary' : type === "病假" ? 'warning' : 'info';
+    },
     renderStatus(row) {
       const { status: status } = row || {};
 

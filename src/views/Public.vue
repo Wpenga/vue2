@@ -85,7 +85,7 @@
 import * as echarts from 'echarts'
 import '@/utils/china.js'  //地图
 import jsonp from 'jsonp'
-import { regionData,CodeToText,TextToCode} from 'element-china-area-data';
+import { CodeToText,TextToCode} from 'element-china-area-data';
 const option = {
   title:{
     text:"全国疫情概览",
@@ -182,7 +182,7 @@ export default {
       },
       alldata:{},
       province:TextToCode['广东省'].code,
-      options:regionData,
+      options:this.regionData,
       tableHeight:100,
       tableData: []
     }

@@ -7,6 +7,8 @@ import './assets/global.css';
 import request from "./utils/request";
 import store from "@/store";
 import '@/utils/hasPermi' // permission control
+//全国省市级源
+import { regionData} from 'element-china-area-data';
 //获取时间
 import {nowTime,getdate} from  "@/utils/getTime"; 
 import { parseTime} from "@/utils/parseTime";
@@ -34,6 +36,7 @@ Vue.component('Editor', Editor)
 // Vue.prototype.axios=request
 //全局引入 注册
 Vue.prototype.request=request
+Vue.prototype.regionData=regionData
 Vue.prototype.nowTime=nowTime
 Vue.prototype.getdate=getdate
 Vue.prototype.parseTime = parseTime

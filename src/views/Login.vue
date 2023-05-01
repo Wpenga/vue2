@@ -1,5 +1,7 @@
-<template>
+<template><div>
+  
   <div class="wrapper">
+    <div class="title">校园疫情防控系统</div>
     <div class="windows">
       <div style="margin: 20px 0;text-align: center;font-size: 24px">登录</div>
       <el-form :label-position="labelPosition" ref="user" label-width="100px" :model="user" :rules="rules">
@@ -18,6 +20,7 @@
       </el-form>
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -69,9 +72,16 @@ export default {
               this.$router.push("/")
 
             }else if(res.code=="500"){
+              this.loading = false
               this.$message.error("系统错误")
             }else if(res.code=="600"){
+              this.loading = false
               this.$message.error("用户名或密码错误")
+            }else if(res.code=="700"){
+              this.loading = false
+              this.$message.warning("账号不存在，请注册")
+              // this.$router.push("/register")
+
             }
           })
         } else {
@@ -79,6 +89,7 @@ export default {
           return false;
         }
       });
+      
 
     },
     onRegister() {
@@ -97,6 +108,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .windows {
@@ -121,4 +133,17 @@ export default {
 .btn el-button:first-child {
   margin-right: 10px;
 }
+
+
+.title {
+  
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 50px;
+  color: #ffffff;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
 </style>

@@ -67,7 +67,7 @@
           
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -76,9 +76,9 @@
           :disabled="single"
           @click="handleUpdate"
           
-        >编辑</el-button>
-      </el-col>
-      <el-col :span="1.5">
+        >编辑</el-button> -->
+      <!-- </el-col> -->
+      <!-- <el-col :span="1.5">
         <el-button
           type="danger"
           plain
@@ -87,7 +87,7 @@
           :disabled="multiple"
           @click="handleDelete"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -165,7 +165,7 @@
             size="mini"
             type="text"
             icon="el-icon-bell"
-            @click="handleUpdate(scope.row)"
+            @click="handleNotice(scope.row)"
             :disabled="scope.row.issign"
             >提醒</el-button
           >
@@ -191,11 +191,29 @@
     <!-- 添加或修改通知公告对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="公告标题" prop="noticeTitle">
-          <el-input v-model="form.noticeTitle" placeholder="请输入公告标题" />
+        <el-form-item label="学号" prop="username">
+          <el-input v-model="form.username" placeholder="请输入学号" />
+        </el-form-item>
+        <el-form-item label="姓名" prop="nickname">
+          <el-input v-model="form.nickname" placeholder="请输入姓名" />
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-radio-group v-model="form.sex">
+            <el-radio :label="'男'">男</el-radio>
+            <el-radio :label="'女'">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <!-- <el-form-item label="性别" prop="sex">
+          <el-input v-model="form.nickname" placeholder="请输入性别" />
+        </el-form-item> -->
+        <el-form-item label="联系方式" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入联系方式" />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
         <!-- <el-col :span="24"> -->
-        <el-form-item label="状态">
+        <!-- <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio
               v-for="dict in dicts"
@@ -204,12 +222,12 @@
               >{{ dict.label }}</el-radio
             >
           </el-radio-group>
-        </el-form-item>
+        </el-form-item> -->
         <!-- </el-col> -->
-        <el-form-item label="公告内容">
-          <el-input v-model="form.noticeContent" :min-height="192" type="textarea" :rows="2"/>
+        <!-- <el-form-item label="公告内容"> -->
+          <!-- <el-input v-model="form.noticeContent" :min-height="192" type="textarea" :rows="2"/> -->
           <!-- <editor v-model="form.noticeContent" :min-height="192" /> -->
-        </el-form-item>
+        <!-- </el-form-item> -->
         <!-- <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" placeholder="请输入备注" />
         </el-form-item> -->
@@ -225,6 +243,7 @@
 <script>
 import { listUser, getUser, delUsers, addUser, updateUser } from "@/api/admin";
 import {serverIp} from "../../../public/config";
+import {addNotice} from "@/api/teacher/notice";
 export default {
   name: "Notice",
   data() {
@@ -335,16 +354,7 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        noticeId: null,
-        noticeTitle: null,
-        noticeType: null,
-        noticeContent: null,
-        status: '1',
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        // remark: null
+        
       };
       this.resetForm("form");
     },
@@ -370,34 +380,46 @@ export default {
       this.open = true;
       this.title = "添加通知公告";
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
+    /** 通知按钮操作 */
+    handleNotice(row) {
       this.reset();
       const noticeId = row.noticeId || this.ids;
-      getUser(noticeId).then((response) => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改通知公告";
+      const createBy = JSON.parse(localStorage.getItem("user")).username
+      const noticeForm={
+        noticeTitle: "签到提醒",
+        noticeType: '0',
+        noticeContent: `${createBy}提醒你打卡啦！`,
+        status: '1',
+        createBy,
+        receiver:row.username
+      }
+      addNotice(noticeForm).then((response) => {
+          this.$modal.msgSuccess("发送通知成功！");
+          // this.open = false;
+          // this.getList();
       });
+      // getUser(noticeId).then((response) => {
+      //   this.form = response.data;
+      //   this.open = true;
+      //   this.title = "修改通知公告";
+      // });
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate((valid) => {
         if (valid) {
-          if (this.form.noticeId != null) {
-            updateUser(this.form).then((response) => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            this.form.createBy = JSON.parse(localStorage.getItem("user")).nickname;
-            addUser(this.form).then((response) => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+          //提交按钮
+          addUser(this.form).then(res=>{
+            if(res.code ==="200"){
+              this.$message.success("添加成功")
+              this.open=false
+              this.getList()
+            }else{
+              this.$message.error("保存失败")
+            }
+
+          })
+          
         }
       });
     },
@@ -428,7 +450,14 @@ export default {
     //导出表格
     handleExport(){
       // this.request("/user/export")
-      window.open(`http://${serverIp}:8090/excel/notfever`)
+      this.$modal.confirm('确认到导出数据？').then(function() {
+        return window.open(`http://${serverIp}:8090/excel/notfever`);
+      }).then((res) => {
+            this.$modal.notifySuccess("导出成功")
+            // this.$message.error("删除失败");
+          
+      }).catch(() => {});
+      
     },
     //导入表格
     handleExcelImportSuccess(){

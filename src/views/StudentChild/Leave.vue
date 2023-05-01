@@ -2,7 +2,7 @@
   <div>
     <el-button
       type="primary"
-      @click="dialogVisible = true"
+      @click="addButton"
       class="add"
       icon="el-icon-plus"
       >添加</el-button
@@ -14,7 +14,12 @@
       <!-- <el-table-column prop="nickname" label="姓名" width="180"> -->
       <!-- <el-table-column prop="nickname" label="姓名" width="180"></el-table-column> -->
       <!-- </el-table-column> -->
-      <el-table-column prop="reason" label="请假原因"> </el-table-column>
+      <el-table-column prop="type" label="请假类型" width="100">
+        <template slot-scope="scope">
+          <el-tag :type="tagType(scope.row.type)">{{scope.row.type}}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="reason" label="详细原因"> </el-table-column>
       
       <el-table-column prop="startTime" label="请假时间"> 
         <template slot-scope="scope">
@@ -33,8 +38,6 @@
       </el-table-column>
       <el-table-column prop="status" label="审批状态">
         <template slot-scope="scope">
-          <!-- <el-button )">{ -->
-          <!-- <el-tag :type="renderStatus(scope.row.status).type" >{{renderStatus(scope.row.status).label}}</el-tag> -->
           <el-tag :type="renderStatus(scope.row).type">{{
             renderStatus(scope.row).label
           }}</el-tag>
@@ -71,33 +74,21 @@
     <el-dialog title="请假单" :visible.sync="dialogVisible" width="50%">
       <span>
         <!-- 请假单里的信息 -->
-        <el-form ref="form" :model="form" label-width="80px">
-          <el-form-item label="请假原因">
-            <el-input
+        <el-form ref="form" :rules="rules" :model="form" label-width="80px">
+          <el-form-item label="请假类型" prop="type">
+          <el-select clearable v-model="form.type" placeholder="请选择" style="width:15%">
+              <el-option v-for="item in options" :key="item" :label="item" :value="item">
+              </el-option>
+          </el-select>
+          </el-form-item>
+          <el-form-item label="详细原因" prop="reason" style="width:80%">
+            <el-input 
               v-model="form.reason"
               type="textarea"
               :rows="2"
             ></el-input>
           </el-form-item>
-          <!-- <el-form-item label="学院">
-            <el-select v-model="form.college" placeholder="请选择所属学院">
-              <el-option label="数计学院" value="数计学院"></el-option>
-              <el-option label="小学教育" value="小学教育"></el-option>
-              <el-option label="音舞学院" value="音舞学院"></el-option>
-              <el-option label="体育学院" value="体育学院"></el-option>
-            </el-select>
-          </el-form-item> -->
-          <!-- <el-form-item label="年级">
-            <el-select v-model="form.grade" placeholder="请选择年级">
-              <el-option label="19级" value="19级"></el-option>
-              <el-option label="20级" value="20级"></el-option>
-              <el-option label="21级" value="21级"></el-option>
-              <el-option label="22级" value="22级"></el-option>
-            </el-select>
-          </el-form-item> -->
-
-          
-          <el-form-item label="时间范围">
+          <el-form-item label="时间范围" prop="Time">
             <el-col :span="11">
               <el-date-picker
               unlink-panels
@@ -110,29 +101,14 @@
               format="yyyy 年 MM 月 dd 日"
               >
             </el-date-picker>
-              <!-- <el-date-picker
-                type="date"
-                placeholder="选择日期"
-                v-model="form.startTime"
-                style="width: 100%"
-              ></el-date-picker> -->
             </el-col>
           </el-form-item>
-          <!-- <el-form-item label="结束时间">
-            <el-col :span="11">
-              <el-date-picker
-                type="date"
-                placeholder="选择日期"
-                v-model="form.endTime"
-                style="width: 100%"
-              ></el-date-picker>
-            </el-col>
-          </el-form-item> -->
         </el-form>
       </span>
+      
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submit">确 定</el-button>
+        <el-button type="primary" @click="submit('form')">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -143,7 +119,15 @@ import { getmyLeave, setLeave ,getmyLeaveById,updateLeave} from "@/api/student";
 // import { STATUS_ENUM } from "./constant";
 export default {
   data() {
+     var checkTime = (rule, value, callback) => {
+      if (this.Time.length == 0) {
+        callback(new Error("请选择时间"));
+      }else{
+          return callback();
+      }
+    };
     return {
+      tag:['info','primary','warning'],
       // 获取个人请假表
       getLeaveData: [],
       dialogVisible: false,
@@ -151,17 +135,23 @@ export default {
       // 请假单数据
       form: {
         username:JSON.parse(localStorage.getItem("user")).username,
-        reason: "",
-        // college: "",
-        // grade: "",
-        startTime: "",
-        endTime: "",
-        status: "",
+        reason: null,
+        startTime: null,
+        endTime: null,
+        status: null,
       },
       pickerOptions: {
         disabledDate(time) {
-          return time.getTime() <= Date.now();
+          const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
+          const now = new Date();
+          const yesterday = new Date(now.getTime() - oneDay);
+          return time.getTime() < yesterday;
         }
+      },
+      options:['事假','病假','其他'],
+      rules: {
+        reason: [{ required: true, message: "请填写原因", trigger: "blur" }],
+        Time: [{ required: true, validator:checkTime, trigger: "blur" }],
       }
     };
   },
@@ -169,9 +159,11 @@ export default {
     this.getleaveform();
   },
   methods: {
+    tagType(type){
+      return type === "事假" ? 'primary' : type === "病假" ? 'warning' : 'info';
+    },
     renderStatus(row) {
       const { status: status } = row || {};
-
       const STATUS_ENUM = {
         NoAllow: {
           value: "0",
@@ -200,10 +192,28 @@ export default {
       });
       return tag;
     },
+    resetForm(refName) {
+      if (this.$refs[refName]) {
+        this.$refs[refName].resetFields();
+      }
+    },  
     // 获取个人请假表
     async getleaveform() {
       const res = await getmyLeave(JSON.parse(localStorage.getItem("user")).username);
       this.getLeaveData = res.data;
+    },
+    // 添加按钮
+    addButton(){
+      this.form = {
+        username:JSON.parse(localStorage.getItem("user")).username,
+        reason: null,
+        startTime: null,
+        endTime: null,
+        status: null,
+      },
+      this.Time = {}
+      this.resetForm('form')
+      this.dialogVisible = true
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -225,24 +235,28 @@ export default {
       });
     },
     // 提交请假表
-    async submit() {
-      this.dialogVisible = false;
-      [this.form.startTime,this.form.endTime ]= this.Time
-      // const { reason, grade, college, date1, date2 } = this.form;
-      this.form.startTime = this.parseTime(this.form.startTime, "{y}-{m}-{d} {h}:{i}:{s}");
-      this.form.endTime = this.parseTime(this.form.endTime,"{y}-{m}-{d} {h}:{i}:{s}");
-      this.form.status=0
-      await setLeave(this.form).then(res =>{
-          if(res.code ==="200"){
-            this.$message.success("提交成功")
-          }else{
-            this.$message.error("提交失败")
-          }
-      }).catch(err =>{
-        this.$message.error("系统错误，稍候重试");
+    async submit(form) {
+      this.$refs[form].validate(async (valid) => {
+        if (valid) {
+          [this.form.startTime,this.form.endTime ]= this.Time
+          // const { reason, grade, college, date1, date2 } = this.form;
+          this.form.startTime = this.parseTime(this.form.startTime, "{y}-{m}-{d} {h}:{i}:{s}");
+          this.form.endTime = this.parseTime(this.form.endTime,"{y}-{m}-{d} {h}:{i}:{s}");
+          this.form.status=0
+          await setLeave(this.form).then(res =>{
+              if(res.code ==="200"){
+                this.$message.success("提交成功")
+              }else{
+                this.$message.error("提交失败")
+              }
+          }).catch(err =>{
+            this.$message.error("系统错误，稍候重试");
+          })
+          this.getleaveform();
+          this.dialogVisible = false;
+        }
       })
-      this.getleaveform();
-    },
+    }
   },
 };
 </script>
