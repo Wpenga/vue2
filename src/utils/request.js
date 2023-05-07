@@ -4,7 +4,8 @@ import ElementUI from "element-ui"
 import {serverIp} from "../../public/config";
 const request = axios.create({
     // baseURL: '/dev-api',
-    baseURL: `http://${serverIp}:8090`,
+    // baseURL: `http://${serverIp}:8090`,
+    baseURL: process.env.VUE_APP_BASE_API,
     timeout: 5000
 })
 
@@ -36,19 +37,19 @@ request.interceptors.response.use(
         if (typeof res === 'string') {
             res = res ? JSON.parse(res) : res
         }
-        if(res.code === "401"){
+        if(res.code === "401"){  //响应失败
             ElementUI.Message({
-                message:res.msg,
+                message:res.msg+'需重新登录',
                 type:"error"
             })
+            store.commit('logout')
         }
         return res;
     },
     error => {
         // store.commit('logout')
-        console.log("token可能过期")
         console.log('err' + error) // for debug
-        return Promise.reject(error)
+        return Promise.reject('测试'+error)
     }
 )
 

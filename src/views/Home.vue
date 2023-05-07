@@ -26,7 +26,7 @@
         </el-card>
       </el-col>
     </el-row>
-<!--    表格-->
+    <!--图表-->
     <el-row>
       <el-col :span="12">
         <div id="main" style="width: 500px;height: 400px"></div>
@@ -42,7 +42,7 @@
 
 <script>
 import * as echarts from 'echarts';
-import { getdata} from "@/api/echarts";
+import { getdata,getTiemCounts} from "@/api/echarts";
 export default {
   name: "Home",
   data(){
@@ -60,7 +60,7 @@ export default {
     //获取用户
       this.loading = true ;
       getdata().then(res => {
-        const {total,signCount,isFeverCount} = res.data
+        const {total,signCount,isFeverCount} = res.data||{}
         this.form = {total,signCount,isFeverCount} 
       })
   },
@@ -129,7 +129,16 @@ export default {
         trigger: 'item',
         formatter: '{a} <br/>{b} : {c} ({d}%)'
       },
-      legend: {
+      toolbox: {
+        show: true,
+        feature: {
+          mark: { show: true },
+          dataView: { show: false, readOnly: true },
+          restore: { show: true },    //刷新
+          saveAsImage: { show: false } //保存
+        }
+      },
+      legend: {  //元素位置
         orient: 'vertical',
         left: 'left'
       },
@@ -137,26 +146,26 @@ export default {
         {
           name: '比例',
           type: 'pie',
-          radius: '50%', //大小
-          label:{               //饼图上显示具体比例
-            normal:{
-              show: true,
-              position:'inner', //标签的位置
-              textStyle:{
-                fontWeight: 300,
-                fontSize: 16,   //文字大小
-                color: '#fff'
-              },
-              // formatter:'{d}%'
-            }
-          },
-          data: [
-            /*{ value: 1048, name: 'Search Engine' },
-            { value: 735, name: 'Direct' },
-            { value: 580, name: 'Email' },
-            { value: 484, name: 'Union Ads' },
-            { value: 300, name: 'Video Ads' }*/
-          ],
+          // radius: '50%', //大小
+          radius: [25, 150],
+          center: ['50%', '50%'],
+          roseType: 'area', //将类型改为南丁格尔玫瑰图
+          itemStyle: {
+        borderRadius: 8
+      },
+          // label:{               //饼图上显示具体比例
+          //   normal:{
+          //     show: false,
+          //     position:'inner', //标签的位置
+          //     textStyle:{
+          //       fontWeight: 300,
+          //       fontSize: 16,   //文字大小
+          //       color: '#fff'
+          //     },
+          //     // formatter:'{d}%'
+          //   }
+          // },
+          data: [],
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -167,7 +176,7 @@ export default {
         }
       ]
     };
-    this.request.get("/echarts/members").then(res =>{
+    getTiemCounts().then(res =>{
       // console.log(res.data);
       //柱状图，折线图
       // option.xAxis.data = res.data
@@ -183,7 +192,7 @@ export default {
         { value: res.data[1], name: '早上' },
         { value: res.data[2], name: '下午' },
         { value: res.data[3], name: '晚上' }
-      ]
+      ].sort((a, b) => b.value - a.value);  //从大到小排序
       pieChart.setOption(pieoption)
     })
 

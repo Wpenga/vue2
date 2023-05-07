@@ -65,31 +65,34 @@ export default {
         nickname: "",
         username: "",
         address:'',
-        isFever:'',
-        goRisk:'',
+        isFever:false,
+        goRisk:false,
+        vaccineCount:'0',
         date:""
       },
-      options: this.regionData,
+      options: [],
       addressSelections:[],
       rules: {
         address: [{ required: true, validator: checkAddress,message: "请选择地址", trigger: "blur" }],
-        // isFever: [{ required: true,trigger: "blur"}],
-        // goRisk: [{ required: true,trigger: "blur"}],
-        // vaccineCount: [{ required: true,trigger: "blur"}],
       },
     };
   },
   created(){
-    //后台获取User数据
-    this.form.username = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).username:""
+    
     this.gethealth();
   
+  },
+  mounted(){
+    //后台获取User数据
+    this.form.username = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).username:""
+    this.form.nickname = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).nickname:""
+    this.options = localStorage.getItem("regionData") ? JSON.parse(localStorage.getItem("regionData")):[]
   },
   methods: {
     // 获取表单信息
     async gethealth() {
       const  res  = await gethealth(JSON.parse(localStorage.getItem("user")).username);
-      if(res.code === "200"){
+      if(res.code === "200" && res.data != null){
         this.form = res.data
         this.form.vaccineCount=res.data.vaccineCount.toString()
         //地址映射,获得区域码 数组

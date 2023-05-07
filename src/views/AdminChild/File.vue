@@ -1,13 +1,17 @@
 <template>
   <div>
     <div style="margin: 10px 0">
-      <el-input style="width: 200px" placeholder="请输入名称" suffix-icon="el-icon-search" v-model="name"></el-input>
+      <el-input style="width: 200px" placeholder="请输入名称" suffix-icon="el-icon-search" v-model="name" @keyup.enter.native="load"></el-input>
       <el-button class="ml-5" type="primary" @click="load">搜索</el-button>
       <el-button type="warning" @click="reset">重置</el-button>
     </div>
     <div style="margin: 10px 0">
-      <el-upload :action="'http://' + serverIp + ':8090/file/upload'" :show-file-list="false"
-                 :on-success="handleFileUploadSuccess" style="display: inline-block">
+      <!-- "'http://' + serverIp + ':8090/file/upload'"  -->
+      <el-upload :action="uploadFileUrl" 
+                 :show-file-list="false"
+                 :headers="headers"
+                 :on-success="handleUploadSuccess" 
+                 style="display: inline-block">
         <el-button type="primary" class="ml-5">上传文件 <i class="el-icon-top"></i></el-button>
       </el-upload>
       <el-popconfirm
@@ -37,7 +41,7 @@
       </el-table-column>
       <el-table-column label="下载">
         <template slot-scope="scope">
-          <el-button type="primary" @click="download(scope.row.url)">下载</el-button>
+          <el-button type="primary" @click="download(scope.row)">下载</el-button>
         </template>
       </el-table-column>
       <el-table-column label="启用">
@@ -80,16 +84,19 @@
 
 <script>
 import {serverIp} from "../../../public/config";
- 
+import { getToken } from "@/utils/auth";
+const baseURL = process.env.VUE_APP_BASE_API
 export default {
   name: "File",
   data() {
     return {
+      uploadFileUrl:baseURL+'/file/upload',
+      headers: { 'token':  getToken() },  //请求头token校验
       // 非多个禁用
       multiple: true,
       serverIp: serverIp,
       tableData: [],
-      name: '',
+      name: null,
       multipleSelection: [],
       pageNum: 1,
       pageSize: 10,
@@ -160,16 +167,17 @@ export default {
       this.pageNum = pageNum
       this.load()
     },
-    handleFileUploadSuccess(res) {
-      console.log(res)
+    handleUploadSuccess(res) {
+      // console.log(res)
       this.$message.success("上传成功")
       this.load()
     },
-    download(url) {
-      window.open(url)
+    download(row) {
+      this.$download.name(row.url, row.name)
     },
     preview(url) {
-      window.open('https://file.keking.cn/onlinePreview?url=' + encodeURIComponent(window.btoa((url))))
+      this.$message.success('vuex:'+this.$store.state.token)
+      // window.open('https://file.keking.cn/onlinePreview?url=' + encodeURIComponent(window.btoa((url))))
       // window.open(url)
     },
   }

@@ -85,7 +85,12 @@
       <el-table-column label="公告ID" align="center" prop="noticeId" />
       <el-table-column label="公告标题" align="center" prop="noticeTitle" />
       <!-- <el-table-column label="公告类型" align="center" prop="noticeType" /> -->
-      <el-table-column label="公告内容" align="center" prop="noticeContent" />
+      <!-- <el-table-column label="公告内容" align="center" prop="noticeContent" /> -->
+      <!-- 截取 -->
+      <el-table-column label="公告内容" align="center" prop="noticeContent">
+        <template slot-scope="scope">{{ scope.row.noticeContent.slice(0, 10) }}</template>
+      </el-table-column>
+
       <!-- <el-table-column label="状态" align="center" prop="status" /> -->
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template slot-scope="scope">

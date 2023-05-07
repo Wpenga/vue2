@@ -10,7 +10,8 @@
   >
     <!--图标logo-->
     <div style="height:60px;line-height: 60px;text-align:center">
-      <img src="../assets/logo.png" style="width:20px;position: relative;top: 5px">
+      <!-- <img src="../assets/logo.png" style="width:20px;position: relative;top: 5px"> -->
+      <img src="../assets/logo2.svg" style="width:20px;position: relative;top: 5px">
       <!--疫情防控-->
       <b style="color:white" v-show="logoTextShow">疫情防控系统</b>
     </div>

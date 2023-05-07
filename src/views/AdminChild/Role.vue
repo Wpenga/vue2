@@ -3,8 +3,6 @@
   <!--搜索-->
   <div style="padding: 10px 0">
     <el-input style="width: 200px" placeholder="请输入名称"  suffix-icon="el-icon-user" v-model="name" clearable @clear="load"></el-input>
-<!--    <el-input style="width: 200px" placeholder="请输入学号"  suffix-icon="el-icon-search" class="ml-5" v-model="id"></el-input>-->
-<!--    <el-input style="width: 200px" placeholder="请输入地址"  suffix-icon="el-icon-position" class="ml-5" v-model="address"></el-input>-->
     <el-button class="ml-5" type="primary" @click="load">搜索</el-button>
     <el-button class="ml-5" type="warning" @click="reset">重置</el-button>
 
@@ -202,11 +200,9 @@ export default {
         params:{
           "pageNum":this.pageNum,
           "pageSize":this.pageSize,
-          "name":this.name,
-          // "description":this.description
+          "name":this.name
         }
       }).then(res => {
-        // console.log(res)
         this.tableData = res.data.records
         this.total = res.data.total
       })

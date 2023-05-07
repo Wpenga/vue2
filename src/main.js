@@ -23,6 +23,10 @@ import Pagination from "@/components/Pagination";
 import RightToolbar from "@/components/RightToolbar"
 // 富文本组件
 import Editor from "@/components/Editor"
+// 文件上传组件
+import FileUpload from "@/components/FileUpload"
+// 图片上传组件
+import ImageUpload from "@/components/ImageUpload"
 Vue.config.productionTip = false
 
 Vue.use(ElementUI,{size:"mini"});
@@ -31,7 +35,8 @@ Vue.use(plugins);
 Vue.component('RightToolbar', RightToolbar)
 Vue.component('Pagination', Pagination)
 Vue.component('Editor', Editor)
-
+Vue.component('FileUpload', FileUpload)
+Vue.component('ImageUpload', ImageUpload)
 // Vue.prototype.this.request=request
 // Vue.prototype.axios=request
 //全局引入 注册

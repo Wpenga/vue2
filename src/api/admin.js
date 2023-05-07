@@ -17,7 +17,7 @@ export function getUser(userId) {
   })
 }
   
-// 新增用户信息
+// 新增/更新用户信息 
 export function addUser(data) {
   return request({
     url: '/user',

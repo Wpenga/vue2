@@ -3,14 +3,18 @@
     <el-form label-width="100px" :rules="rules" :model="form" ref="form">
       <el-upload
         class="avatar-uploader"
-        :action="'http://' + serverIp + ':8090/file/upload'"
+        :action="uploadFileUrl"
         :show-file-list="false"
-        :on-success="handleAvatarSuccess"
+        :on-success="handleUploadSuccess"
+        :headers="headers"
+        :on-preview="handlePictureCardPreview"
+        :before-upload="beforeAvatarUpload"
       >
         <img v-if="form.avatarUrl" :src="form.avatarUrl" class="avatar" />
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
-
+      <!-- <ImageUpload
+      /> -->
       <el-form-item label="学号">
         <el-input
           v-model="form.username"
@@ -61,10 +65,9 @@
       </el-select>
     </el-form-item> -->
       <el-form-item>
-        <el-button type="primary" @click="save('form')"
-          >确 定</el-button
-        ></el-form-item
-      >
+        <el-button type="primary" @click="save('form')">确 定</el-button>
+        <el-button type="danger" @click="$router.push('/home')">关 闭</el-button>
+      </el-form-item>
     </el-form>
   </el-card>
 </template>
@@ -72,6 +75,8 @@
 <script>
 import {getCodeAddress, getTextAderess} from "@/utils/getAddress";
 import { serverIp } from "../../public/config";
+import { getToken } from "@/utils/auth";
+const baseURL = process.env.VUE_APP_BASE_API
 export default {
   name: "Person",
   data() {
@@ -90,6 +95,10 @@ export default {
       }
     };
     return {
+      uploadFileUrl:baseURL+'/file/upload',
+      // 'http://' + serverIp + ':8090/file/upload', //上传地址
+      headers: { 'token':  getToken() },  //请求头token校验
+      fileType:["jpg","png","jpeg"],
       options: this.regionData,
       addressSelections: [],
       serverIp: serverIp,
@@ -120,6 +129,32 @@ export default {
     });
   },
   methods: {
+    // 上传前loading加载
+    beforeAvatarUpload(file) {
+        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+        // if (!allowedTypes.includes(file.type)) {
+        //   this.$message.error('只能上传 PNG/JPG/JPEG 格式的图片');
+        //   return false;
+        // }
+
+        const isJPG = allowedTypes.includes(file.type)
+        // file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 PNG/JPG/JPEG 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
+    },
+    // 预览
+    handlePictureCardPreview(file) {
+      // this.dialogImageUrl = file.url;
+      this.form.avatarUrl = file.url;
+      this.dialogVisible = true;
+    },
     async getUser() {
       return await this.request.get("/user/username/" + this.user.username);
     },
@@ -149,8 +184,16 @@ export default {
         }
       });
     },
-    handleAvatarSuccess(res) {
-      this.form.avatarUrl = res;
+    handleUploadSuccess(res) {
+      if(res.code === "200"){
+        console.log(res)
+        this.$message.success("上传成功")
+        this.form.avatarUrl = res.data.url;
+      }else{
+        this.$message.error("上传失败，请重试")
+      }
+      
+      
     },
   },
 };

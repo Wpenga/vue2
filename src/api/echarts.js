@@ -7,3 +7,11 @@ export function getdata(){
         method: 'get',
     })
 }
+
+//获取时间分布
+export function getTiemCounts(){
+    return request({
+        url: '/echarts/timeCounts',
+        method: 'get',
+    })
+}

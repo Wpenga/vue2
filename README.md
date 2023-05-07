@@ -19,7 +19,7 @@ npm run build
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## 目录结构
-'''
+```
 ├── public                    # 项目配置目录
 │   ├── index.html            # 应用入口页面
 │   └── favicon.ico           # 图标文件
@@ -36,5 +36,5 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 ├── .babel.config.js          # babel配置文件
 ├── .gitignore                # git忽略文件
 ├── package.json              # 项目及其依赖的各种配置信息
-├── README.md                 # 项目说明文档
-'''
+└── README.md                 # 项目说明文档
+```

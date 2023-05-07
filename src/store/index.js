@@ -3,7 +3,6 @@ import  Vuex from 'vuex'
 import router, {resetRouter} from "@/router";
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import {login} from '@/api/user'
-import modal from '@/plugins/modal';
 Vue.use(Vuex)
 
 const  store = new Vuex.Store({
@@ -11,11 +10,12 @@ const  store = new Vuex.Store({
         currentPathName:'',
         token:getToken(),
         username:'',
-        nickname:''
+        nickname:'',
         // username:JSON.parse(localStorage.getItem("user")).username,
         // nickname:JSON.parse(localStorage.getItem("user")).nickname,
     },
     mutations:{
+        
         setPath(state){
             state.currentPathName = localStorage.getItem("currentPathName")
         },
@@ -33,7 +33,6 @@ const  store = new Vuex.Store({
             localStorage.removeItem("user")
             localStorage.removeItem("menus")
             router.push("/login")
-
             // 重置路由
             resetRouter()
         }
@@ -55,7 +54,6 @@ const  store = new Vuex.Store({
                         //存储数据 包含用户名，密码，昵称，图片url
                         localStorage.setItem("user",JSON.stringify(data))
                         localStorage.setItem("menus",JSON.stringify(data.menus))
-
                         setToken(data.token)
                     // }else if(res.code === "500"){ 
                         
