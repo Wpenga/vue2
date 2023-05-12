@@ -2,7 +2,7 @@ import  Vue from 'vue'
 import  Vuex from 'vuex'
 import router, {resetRouter} from "@/router";
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import {login} from '@/api/user'
+import {login,logout} from '@/api/user'
 Vue.use(Vuex)
 
 const  store = new Vuex.Store({
@@ -29,9 +29,12 @@ const  store = new Vuex.Store({
             state.nickname = nickname
         },
         logout() {
+            
             // 清空缓存
             localStorage.removeItem("user")
             localStorage.removeItem("menus")
+            localStorage.removeItem("token")
+            localStorage.removeItem("yqdata")
             router.push("/login")
             // 重置路由
             resetRouter()
@@ -52,7 +55,8 @@ const  store = new Vuex.Store({
                         commit('setUsername',data.username)
                         commit("setNickname",data.nickname)
                         //存储数据 包含用户名，密码，昵称，图片url
-                        localStorage.setItem("user",JSON.stringify(data))
+                        localStorage.setItem("user",JSON.stringify(data.user))
+                        localStorage.setItem("token",JSON.stringify(data.token))
                         localStorage.setItem("menus",JSON.stringify(data.menus))
                         setToken(data.token)
                     // }else if(res.code === "500"){ 

@@ -224,7 +224,8 @@ export default {
     // 改操作
     handleEdit(row) {
       this.dialogFormVisible=true
-      this.form=row
+      this.form = JSON.parse(JSON.stringify(row))
+      // this.form=row
     },
     //删操作
     handleDelete(row) {

@@ -1,6 +1,7 @@
 <template>
   <div>
     <div style="margin: 10px 0">
+      
       <el-input style="width: 200px" placeholder="请输入名称" suffix-icon="el-icon-search" v-model="name" @keyup.enter.native="load"></el-input>
       <el-button class="ml-5" type="primary" @click="load">搜索</el-button>
       <el-button type="warning" @click="reset">重置</el-button>
@@ -11,6 +12,7 @@
                  :show-file-list="false"
                  :headers="headers"
                  :on-success="handleUploadSuccess" 
+                 :before-upload="beforeUpload"
                  style="display: inline-block">
         <el-button type="primary" class="ml-5">上传文件 <i class="el-icon-top"></i></el-button>
       </el-upload>
@@ -36,7 +38,8 @@
       <el-table-column prop="size" label="文件大小(kb)"></el-table-column>
       <el-table-column label="预览">
         <template slot-scope="scope">
-          <el-button type="primary" @click="preview(scope.row.url)">预览</el-button>
+          <ImagePreView :src="scope.row.url"/>
+          <!-- <el-button type="primary" @click="preview(scope.row.url)">预览</el-button> -->
         </template>
       </el-table-column>
       <el-table-column label="下载">
@@ -44,7 +47,7 @@
           <el-button type="primary" @click="download(scope.row)">下载</el-button>
         </template>
       </el-table-column>
-      <el-table-column label="启用">
+      <el-table-column label="启用" v-if="0==1">
         <template slot-scope="scope">
           <el-switch v-model="scope.row.enable" active-color="#13ce66" inactive-color="#ccc"
                      @change="changeEnable(scope.row)"></el-switch>
@@ -168,15 +171,34 @@ export default {
       this.load()
     },
     handleUploadSuccess(res) {
-      // console.log(res)
       this.$message.success("上传成功")
       this.load()
+    },
+    // 上传前loading加载
+    beforeUpload(file) {
+        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg','image/gif'];
+        // if (!allowedTypes.includes(file.type)) {
+        //   this.$message.error('只能上传 PNG/JPG/JPEG 格式的图片');
+        //   return false;
+        // }
+        // console.log(file.type);
+        const isJPG = allowedTypes.includes(file.type)
+        // file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 PNG/JPG/JPEG/GIF 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
     },
     download(row) {
       this.$download.name(row.url, row.name)
     },
     preview(url) {
-      this.$message.success('vuex:'+this.$store.state.token)
+      // this.$message.success('vuex:'+this.$store.state.token)
       // window.open('https://file.keking.cn/onlinePreview?url=' + encodeURIComponent(window.btoa((url))))
       // window.open(url)
     },

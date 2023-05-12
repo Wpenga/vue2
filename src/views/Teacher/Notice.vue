@@ -97,7 +97,7 @@
       </el-table-column>
       <!-- 截取 -->
       <el-table-column label="公告内容" align="center" prop="noticeContent">
-        <template slot-scope="scope">
+        <template slot-scope="scope" v-if="scope.row.noticeContent">
           {{ scope.row.noticeContent.length > 7 ? scope.row.noticeContent.slice(0, 10) + '...' : scope.row.noticeContent }}
         </template>
       </el-table-column>
@@ -158,10 +158,11 @@
         <el-form-item label="公告标题" prop="noticeTitle">
           <el-input v-model="form.noticeTitle" placeholder="请输入公告标题" />
         </el-form-item>
-        <el-form-item label="创建者" prop="noticeTitle" v-if="role === 'ROLE_ADMIN'">
+        <el-form-item label="创建者" prop="createBy" v-if="role === 'ROLE_ADMIN'">
           <el-input v-model="form.createBy" placeholder="请输入创建者" />
         </el-form-item>
-        <el-form-item label="公告类型">
+        
+        <el-form-item label="公告类型"  prop="noticeType" >
         <el-select  v-model="form.noticeType" placeholder="请选择类型" style="width: 100%">
           <!-- <el-option label="公告" value="0"></el-option>
           <el-option label="通知" value="1"></el-option> -->
@@ -169,6 +170,17 @@
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="接收者" prop="receiver" v-show="form.noticeType=='1'" >
+        <el-select v-model="form.receiver" filterable placeholder="请选择" clearable>
+          <el-option
+            v-for="item in userList"
+            :key="item.username"
+            :label="item.nickname"
+            :value="item.username">
+          </el-option>
+        </el-select>
+          <!-- <el-input v-model="form.receiver" placeholder="请输入接收者" /> -->
+        </el-form-item>
         <!-- <el-col :span="24"> -->
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
@@ -205,7 +217,7 @@ import {
   addNotice,
   updateNotice,
 } from "@/api/teacher/notice";
-
+import {listUserAll} from "@/api/admin"
 export default {
   name: "Notice",
   data() {
@@ -240,6 +252,7 @@ export default {
       },
       // 表单参数
       form: {},
+      userList:[],//用户选择列表
       // 表单校验
       rules: {
         noticeTitle: [
@@ -247,6 +260,12 @@ export default {
         ],
         noticeType: [
           { required: true, message: "公告类型不能为空", trigger: "change" },
+        ],
+        createBy:[
+          { required: true, message: "创建者不能为空", trigger: "change" },
+        ],
+        receiver:[
+          { required: true, message: "接收对象不能为空", trigger: "change" },
         ],
       },
       dicts: [
@@ -261,8 +280,14 @@ export default {
   },
   created() {
     this.getList();
+    this.getAlluser();
   },
   methods: {
+    getAlluser(){
+        listUserAll().then(res=>{
+          this.userList = res.data
+      })
+    },
     resetForm(refName) {
       if (this.$refs[refName]) {
         this.$refs[refName].resetFields();
@@ -296,6 +321,7 @@ export default {
         createTime: null,
         updateBy: null,
         updateTime: null,
+        receiver: null
         // remark: null
       };
       this.resetForm("form");
@@ -344,7 +370,9 @@ export default {
               this.getList();
             });
           } else {
-            this.form.createBy = JSON.parse(localStorage.getItem("user")).nickname;
+            if(!JSON.parse(localStorage.getItem("user")).role == "ROLE_ADMIN"){
+                this.form.createBy = JSON.parse(localStorage.getItem("user")).nickname;
+            }
             addNotice(this.form).then((response) => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;

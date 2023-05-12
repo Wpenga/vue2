@@ -14,9 +14,9 @@ const request = axios.create({
 // 比如统一加token，对请求参数统一加密
 request.interceptors.request.use(config => {
     config.headers['Content-Type'] = 'application/json;charset=utf-8';
-    let user =localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")):null
-    if(user){
-        config.headers['token'] = user.token;  // 设置请求头
+    let token =localStorage.getItem("token") ? JSON.parse(localStorage.getItem("token")):null
+    if(token){
+        config.headers['token'] = token;  // 设置请求头
     }
 
     return config
@@ -28,6 +28,7 @@ request.interceptors.request.use(config => {
 // 可以在接口响应后统一处理结果
 request.interceptors.response.use(
     response => {
+       
         let res = response.data;
         // 如果是返回的文件
         if (response.config.responseType === 'blob') {
@@ -37,19 +38,19 @@ request.interceptors.response.use(
         if (typeof res === 'string') {
             res = res ? JSON.parse(res) : res
         }
-        if(res.code === "401"){  //响应失败
+        if(res.code.toString() === "401"){  //响应失败
             ElementUI.Message({
                 message:res.msg+'需重新登录',
                 type:"error"
             })
-            store.commit('logout')
+            store.commit('logout')//退出
         }
         return res;
     },
     error => {
         // store.commit('logout')
         console.log('err' + error) // for debug
-        return Promise.reject('测试'+error)
+        return Promise.reject(error)
     }
 )
 

@@ -17,7 +17,7 @@ export default {
       responseType: 'blob',
       headers: { 'token':  getToken() }
     }).then((res) => {
-        console.log(res);
+        // console.log(res);
       const isBlob = this.blobValidate(res.data);
       if (isBlob) {
         const blob = new Blob([res.data])

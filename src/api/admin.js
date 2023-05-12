@@ -8,8 +8,14 @@ export function listUser(query) {
     params: query
   })
 }
-  
-// 查询用户信息详细
+// 所有信息
+export function listUserAll() {
+  return request({
+    url: '/user/ids',
+    method: 'get'
+  })
+}
+// 查询用户信息详情
 export function getUser(userId) {
   return request({
     url: '/user/' + userId,
@@ -48,5 +54,21 @@ export function delUsers(userIds) {
     url: '/user/del/batch',
     method: 'post',
     data:userIds
+  })
+}
+
+// 获取角色信息
+export function getRole() {
+  return request({
+    url: '/role' ,
+    method: 'get'
+  })
+}
+// 导入用户列表
+export function importFile(data){
+  return request({
+    url: '/user/import',
+    method: 'post',
+    data
   })
 }

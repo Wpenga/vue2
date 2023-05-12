@@ -87,15 +87,20 @@
           plain
           icon="el-icon-download"
           size="mini"
-          @click="handleExport(scope.row)"
+          @click="handleExport"
         >导出</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-upload
           :action="uploadFileUrl"
+          :limit="1"
           :headers="headers"
           :show-file-list="false" accept=".xlsx"
+          
           :on-success="handleExcelImportSuccess"
+          :before-upload="handleBeforeUpload"
+          :on-error="handleUploadError"
+          :on-progress="handleProgress"	
           style="display: inline-block"
         ><el-button
           type="info"
@@ -213,7 +218,7 @@
 <script>
 // import { MessageBox } from 'element-ui';
 import {serverIp} from "../../../public/config";
-import { listUser, getUser, delUsers, addUser, updateUser } from "@/api/admin";
+import { listUser, getUser, delUsers, addUser, updateUser,importFile,getRole } from "@/api/admin";
 import { getToken } from "@/utils/auth";
 const baseURL = process.env.VUE_APP_BASE_API
 export default {
@@ -299,7 +304,7 @@ export default {
         this.loading = false;
       })
 
-      this.request.get("/role").then(res=>{
+      getRole().then(res=>{
         this.roles = res.data
       })
     },
@@ -341,7 +346,7 @@ export default {
     handleEdit(row) {
       this.resetForm("form");
       const data =  row.id ? row : this.selection[0]
-      this.form = JSON.parse(JSON.stringify(data))
+      this.form = JSON.parse(JSON.stringify(data)) //深度拷贝
       this.dialogFormVisible = true
     },
     //删操作
@@ -380,19 +385,6 @@ export default {
             this.$message.error("删除失败");
           }
       }).catch(() => {});
-        
-      // });
-      
-      // let ids = this.ids
-      // this.multipleSelection.map(v => v.id)  //[1,2,3]
-      // this.request.post("/user/del/batch",userIds).then(res=>{
-      //   if(res.code === "200"){
-      //     this.$message.success("删除成功")
-      //     this.getList()
-      //   }else{
-      //     this.$message.error("删除失败")
-      //   }
-      // })
     },
     //pageSize改变时触发
     handleSizeChange(pageSize){
@@ -411,17 +403,82 @@ export default {
     filterTag(value, row) {
       return row.sign === value;
     },
+    
     //导出表格
-    handleExport(row){
+    handleExport(){
       // this.request("/user/export")
       // window.open(`http://${serverIp}:8090/user/export`)
-      // window.open(baseURL+`/user/export`)
-      this.$download.name(row.url, row.name)
+      const url = baseURL+`/user/export`
+      // this.$download.name(url, "用户表 "+this.parseTime(new Date(),'{y}-{m}-{d} {h}:{i}:{s}')+".xlsx")
+      // this.$message.success("下载成功")
+
+      this.$modal.confirm('确认到导出数据？').then(()=> {
+        return this.$download.name(url, "用户表 "+this.parseTime(new Date(),'{y}-{m}-{d} {h}:{i}:{s}')+".xlsx");
+      }).then((res) => {
+            this.$modal.notifySuccess("导出成功")
+            // this.$message.error("删除失败");
+          
+      }).catch(() => {});
+      
+    },
+    handleExcelImport(params){
+      console.log("uploadFile", params.file);
+      var file = params.file
+      // 通过 FormData 对象上传文件
+      var formData = new FormData();
+      formData.append("file", params);
+      
+      console.log("测试1",formData)
+      importFile(formData).then((res) => {
+        // this.request.post
+          console.log("测试",res);
+          if (res.code === "200") {
+            this.$modal.notifySuccess("导入成功，密码默认 123456，角色为学生");
+          } else {
+            this.$message.error("文件上传失败");
+          }
+        }).catch((error)=>{
+          this.$message.error("异常",formData)
+        });
+
     },
     //导入表格
-    handleExcelImportSuccess(){
-      this.$message.success("导入成功")
+    handleExcelImportSuccess(res){
+      if (res.code === "200") {
+            this.$modal.notifySuccess("导入成功，密码默认 123456，角色为学生");
+          } else {
+            this.$message.error("用户已存在，无需上传");
+          }
+      // this.$modal.notifySuccess("导入成功,密码默认123456，角色为学生")
+      this.loading = false
       this.getList()
+    },
+    // 文件校验
+    handleBeforeUpload(file){
+        const isExcel = file.name.includes('.xlsx')
+        // file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isExcel) {
+          this.$message.error('导入文件只能是 xlsx 格式!');
+          return false;
+        }
+        // 校检文件大小
+        const isLt = file.size / 1024 / 1024 < 5;
+        if (!isLt) {
+          this.$modal.msgError(`上传文件大小不能超过 ${this.fileSize} MB!`);
+          return false;
+        }
+        
+    },
+    handleProgress(){
+      this.loading = true
+      this.$message.warning("文件上传中，请稍等")
+    },
+    handleUploadError(err,file){
+      // console.log(file);
+      this.$message.error("文件上传失败，请重试")
+      this.loading = false
     }
   }
 }

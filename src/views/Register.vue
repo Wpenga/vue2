@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { register } from '@/api/user';
 export default {
   name: "Register",
   data() {
@@ -55,7 +56,8 @@ export default {
             this.$message.error("两次密码不一致")
             return  false
           }
-          this.request.post("/user/register",this.user).then(res=>{
+          // this.request.post("/user/register",this.user).then(res=>{
+          register(this.user).then(res=>{
             if(res.code==="200"){
               this.$message.success("注册成功")
               this.$router.push("/login")

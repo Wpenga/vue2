@@ -68,7 +68,7 @@ export default {
       let username = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).username:""
       this.request.get("/user/username/"+username).then(res=>{
         //重新赋值
-        console.log("更新数据");
+        // console.log("更新数据");
         this.user = res.data
       })
     },

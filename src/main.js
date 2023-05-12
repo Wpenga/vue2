@@ -27,6 +27,8 @@ import Editor from "@/components/Editor"
 import FileUpload from "@/components/FileUpload"
 // 图片上传组件
 import ImageUpload from "@/components/ImageUpload"
+// 图片预览组件
+import ImagePreView from "@/components/ImagePreView"
 Vue.config.productionTip = false
 
 Vue.use(ElementUI,{size:"mini"});
@@ -37,6 +39,7 @@ Vue.component('Pagination', Pagination)
 Vue.component('Editor', Editor)
 Vue.component('FileUpload', FileUpload)
 Vue.component('ImageUpload', ImageUpload)
+Vue.component("ImagePreView",ImagePreView)
 // Vue.prototype.this.request=request
 // Vue.prototype.axios=request
 //全局引入 注册

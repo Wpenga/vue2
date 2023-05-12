@@ -244,6 +244,7 @@
 import { listUser, getUser, delUsers, addUser, updateUser } from "@/api/admin";
 import {serverIp} from "../../../public/config";
 import {addNotice} from "@/api/teacher/notice";
+const baseURL = process.env.VUE_APP_BASE_API
 export default {
   name: "Notice",
   data() {
@@ -451,11 +452,12 @@ export default {
     //导出表格
     handleExport(){
       // this.request("/user/export")
-      this.$modal.confirm('确认到导出数据？').then(function() {
-        return window.open(`http://${serverIp}:8090/excel/notfever`);
+      const url = baseURL+`/excel/notfever`
+      this.$modal.confirm('确认到导出数据？').then(() => {
+        return this.$download.name(url, "学生表 "+this.parseTime(new Date(),'{y}-{m}-{d} {h}:{i}:{s}')+".xlsx");
+        // window.open(`http://${serverIp}:8090/excel/notfever`);
       }).then((res) => {
             this.$modal.notifySuccess("导出成功")
-            // this.$message.error("删除失败");
           
       }).catch(() => {});
       

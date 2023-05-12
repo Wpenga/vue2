@@ -1,11 +1,12 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <!--疫情情况-->
-    <div>
+    <div >
       <el-row :gutter="10" style="margin-bottom: 40px;display: flex; flex-wrap: wrap;">
         <el-col :span="5"  style="flex-basis: 20%;">
           <el-card style="color: #409EFF;">
             <div style="font-weight: bolder"><i class="el-icon-warning"></i>累计确诊人数</div>
+            <!-- <div style="padding:10px 0; text-align: center;font-weight: bold"><el-statistic group-separator=","  :value="form.gntotal"></el-statistic></div> -->
             <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.gntotal}}</div>
           </el-card>
         </el-col>
@@ -30,7 +31,7 @@
 
         <el-col :span="5" style="flex-basis: 20%;">
           <el-card style="color:rgb(102,102,102);">
-            <div style="font-weight: bolder"><i class="el-icon-s-opportunity"></i>累计死亡</div>
+            <div style="font-weight: bolder"><i class="el-icon-s-opportunity"></i>累计死亡(较昨日)</div>
             <div style="padding:10px 0; text-align: center;font-weight: bold">{{form.deathtotal}}</div>
           </el-card>
         </el-col>
@@ -174,12 +175,13 @@ const option = {
   tooltip:{
     trigger:'item',
     formatter: function(params){
+      
       return '<b>' + params.name + '</b>' + '<br/>' +
       '累计确诊: ' + params.value + '<br/>' +
-      '累计治愈：' + params.data.cureNum+ '<br/>' +
-      '现存确诊：' + params.data.econNum+ '<br/>' +
-      '累计死亡: ' + params.data.deathNum;
-      
+      '累计治愈：' + (params.data ? params.data.cureNum : 0) + '<br/>' +
+      '现存确诊：' + (params.data ? params.data.econNum : 0) + '<br/>' +
+      '累计死亡: ' + (params.data ? params.data.deathNum : 0);
+
     }
     // '{a}<br/>{b} : {c} '
   },
@@ -219,17 +221,23 @@ export default {
       tableData: []
     }
   },
-
+  created() {
+    this.loading = true
+    // this.mychart = echarts.init(this.$refs.mapbox);
+    this.alldata = localStorage.getItem("yqdata") ? JSON.parse(localStorage.getItem("yqdata")):this.getData();
+    this.handleData();
+    
+    this.loading = false
+  },
   mounted() {
     // this.getData();
     this.mychart = echarts.init(this.$refs.mapbox);
-    this.getData();
+    // this.getData();
+    
     this.mychart.setOption(option)
   },
 
-  created() {
-    // this.getCount()
-  },
+  
   methods: {
     setRowStyle({row, column}){
       if(column.label=='累计治愈'){
@@ -242,23 +250,29 @@ export default {
       jsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json',{},(err,data)=>{
         if(!err){
           this.alldata = data.data
-          const { times, gntotal, curetotal, econNum, jwsrNum,deathtotal } = this.alldata;
-          this.form = { times, gntotal, curetotal, econNum, jwsrNum,deathtotal };
-          this.getList(this.province)
-          let list = this.alldata.list.map(item=>({
-            name:item.name,   //省份
-            value:item.value, //累计确诊
-            deathNum:item.deathNum,
-            cureNum:item.cureNum,    //累计治愈
-            econNum:item.econNum,    //现存确诊
-          }))
-          option.title.subtext = this.form.times
-          option.series[0].data = list;
-          this.mychart.setOption(option);
+          localStorage.setItem("yqdata",JSON.stringify(data.data))
+          return data.data
         }
       })
     },
-    
+    handleData(){
+      try {
+        const { times, gntotal, curetotal, econNum, jwsrNum,deathtotal } = this.alldata;
+        this.form = { times, gntotal, curetotal, econNum, jwsrNum,deathtotal };
+        this.getList(this.province)
+        let list = this.alldata.list.map(item=>({
+          name:item.name,   //省份
+          value:item.value, //累计确诊
+          deathNum:item.deathNum,
+          cureNum:item.cureNum,    //累计治愈
+          econNum:item.econNum,    //现存确诊
+        }))
+        option.title.subtext = this.form.times
+        option.series[0].data = list;
+      } catch (error) {
+        
+      }
+    },
     //获取省份数据
     getList(selectedValue){
         if(selectedValue){   //判断有值才搜索

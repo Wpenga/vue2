@@ -113,7 +113,7 @@ export default {
   created() {
     let username = null;
     // if(JSON.parse(localStorage.getItem("user")).role == "ROLE_STUDENT"){
-    username = JSON.parse(localStorage.getItem("user")).username;
+      username = JSON.parse(localStorage.getItem("user")).username;
     // }
     //获取通知内容
     getNoticeOpen({ username }).then((response) => {

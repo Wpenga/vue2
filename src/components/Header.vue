@@ -43,6 +43,7 @@
 </template>
 
 <script>
+import {logout} from '@/api/user'
 export default {
   name: "Header",
   props:{
@@ -56,7 +57,9 @@ export default {
     }
   },
   methods:{
-    logout(){//退出登录
+    async logout(){//退出登录
+      //登出接口，删除redis缓存
+      await logout()
       this.$store.commit("logout")
       this.$message.success("退出成功")
     },

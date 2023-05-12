@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <div class="wrapper">
+  <!-- style="{ backgroundImage: `url(${backImg})` }" -->
+  <div >
+    <div class="wrapper" :style="{ backgroundImage: `url(${backImg})` }">
       <div class="title">校园疫情防控系统</div>
       <div class="windows">
         <div style="margin: 20px 0; text-align: center; font-size: 24px">
@@ -60,10 +61,13 @@
 import router, { setRoutes } from "@/router";
 import jsonp from 'jsonp';
 import { login } from "@/api/user";
+import backImg from "/src/assets/background.jpg"
+import "@/assets/background.jpg"
 export default {
   name: "Login",
   data() {
     return {
+      backImg:backImg,
       loading: false,
       labelPosition: "right",
       user: {
@@ -105,11 +109,14 @@ export default {
               setRoutes();
               this.$message.success("登录成功");
               this.$router.push("/");
+              //地区数据
               localStorage.setItem("regionData",JSON.stringify(this.regionData))
-              // jsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json',{},(err,data)=>{
-              //     localStorage.setItem("yqdata",JSON.stringify(data.data))
-              // })
-              
+              //疫情信息
+              jsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json',{},(err,data)=>{
+                  if(!err){
+                    this.alldata = data.data
+                    localStorage.setItem("yqdata",JSON.stringify(data.data))
+                  }})
             } else if (res.code == "500") {
               this.loading = false;
               this.$message.error("系统错误");
@@ -120,8 +127,15 @@ export default {
               this.loading = false;
               this.$message.warning("账号不存在，请注册");
               // this.$router.push("/register")
+            }else{
+              this.loading = false;
+              this.$message.error("超时，请重试")
             }
-          });
+          })
+          .catch((err) => {
+            this.loading = false;
+              this.$message.error("错误:"+err);
+            });;
         } else {
           console.log("非法!!");
           return false;
@@ -142,11 +156,15 @@ export default {
 <style scoped>
 .wrapper {
   height: 100vh;
-  background-image: linear-gradient(to bottom right, #fc466b, #3f5efb); /*渐变*/
+  /* background-image: url("/src/assets/background.jpg"); */
+  /*linear-gradient(to bottom right, #fc466b, #3f5efb); 渐变*/
+  /* background-color: rgb(18, 243, 213); */
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  background-size: cover;
+  background-position: center center;
 }
 
 .windows {

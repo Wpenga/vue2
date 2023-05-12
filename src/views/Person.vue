@@ -2,6 +2,8 @@
   <el-card style="width: 400px">
     <el-form label-width="100px" :rules="rules" :model="form" ref="form">
       <el-upload
+        ref="upload" 
+        :limit="1"
         class="avatar-uploader"
         :action="uploadFileUrl"
         :show-file-list="false"
@@ -76,6 +78,7 @@
 import {getCodeAddress, getTextAderess} from "@/utils/getAddress";
 import { serverIp } from "../../public/config";
 import { getToken } from "@/utils/auth";
+import { updateUser} from "@/api/user"
 const baseURL = process.env.VUE_APP_BASE_API
 export default {
   name: "Person",
@@ -129,9 +132,13 @@ export default {
     });
   },
   methods: {
+     // 确认上传
+     submitUpload() {
+      this.$refs.upload.submit();
+    },
     // 上传前loading加载
     beforeAvatarUpload(file) {
-        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+        const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg','image/gif'];
         // if (!allowedTypes.includes(file.type)) {
         //   this.$message.error('只能上传 PNG/JPG/JPEG 格式的图片');
         //   return false;
@@ -142,7 +149,7 @@ export default {
         const isLt2M = file.size / 1024 / 1024 < 2;
 
         if (!isJPG) {
-          this.$message.error('上传头像图片只能是 PNG/JPG/JPEG 格式!');
+          this.$message.error('上传头像图片只能是 PNG/JPG/JPEG/GIF 格式!');
         }
         if (!isLt2M) {
           this.$message.error('上传头像图片大小不能超过 2MB!');
@@ -164,7 +171,8 @@ export default {
         if (valid) {
           //根据区域码获取对应地址
           this.form.address = getTextAderess(this.addressSelections)
-          this.request.post("/user", this.form).then((res) => {
+          // this.request.put("/user", this.form).then((res) => {
+            updateUser(this.form).then((res) => {
             if (res.code === "200") {
               this.$message.success("保存成功");
               //触发父级更新User的方法
