@@ -78,6 +78,7 @@
     transition: all 0.3s;
     cursor: pointer;
   }
+  /* 实现图片放大1.2倍 */
   .el-image__inner:hover {
     transform: scale(1.2);
   }

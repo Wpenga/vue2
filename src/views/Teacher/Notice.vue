@@ -373,10 +373,14 @@ export default {
             if(!JSON.parse(localStorage.getItem("user")).role == "ROLE_ADMIN"){
                 this.form.createBy = JSON.parse(localStorage.getItem("user")).nickname;
             }
-            addNotice(this.form).then((response) => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
+            addNotice(this.form).then((res) => {
+              if(res.code ==="200"){
+                this.$modal.msgSuccess("新增成功");
+                this.open = false;
+                this.getList();
+              }else{
+                this.$message.error("新增失败")
+              }
             });
           }
         }
@@ -384,7 +388,7 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      console.log(row);
+      // console.log(row);
       const noticeIds=  row.noticeId ? [row.noticeId] : this.ids
       // const noticeIds = row.noticeId || this.ids;
       this.$modal

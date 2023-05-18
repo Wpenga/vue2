@@ -64,5 +64,6 @@ export default {
   width: calc(33.33% - 10px);
   margin-bottom: 20px;
   margin-right: 10px;
+  cursor: pointer;
 }
 </style>

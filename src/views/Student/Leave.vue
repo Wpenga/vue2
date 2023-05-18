@@ -140,14 +140,34 @@ export default {
         endTime: null,
         status: null,
       },
-      pickerOptions: {
-        disabledDate(time) {
-          const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
-          const now = new Date();
-          const yesterday = new Date(now.getTime() - oneDay);
-          return time.getTime() < yesterday;
-        }
-      },
+      // pickerOptions: {
+      //   disabledDate(time) {
+          
+      //     const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
+      //     const now = new Date();
+      //     const yesterday = new Date(now.getTime() - oneDay);
+      //     return time.getTime() < yesterday;
+      //   }
+     
+      // }},
+      // pickerOptions: this.disabledDate, // 修改这里
+  //     {
+  //       disabledDate(time) {
+  //   const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
+  //   const now = new Date();
+  //   const yesterday = new Date(now.getTime() - oneDay);
+  //   const leaveList = this.getLeaveData; // 获取所有请假时间段
+  //   for (let i = 0; i < leaveList.length; i++) {
+  //     const start = new Date(leaveList[i].startTime); // 转换成日期类型
+  //     const end = new Date(leaveList[i].endTime);
+  //     if (time >= start && time <= end) { // 判断当前日期是否在某个请假时间段内
+  //       return true; // 如果是则为禁用状态
+  //     }
+  //   }
+  //   return time.getTime() < yesterday; // 否则再判断是否小于昨天
+  // }
+    
+  // },
       options:['事假','病假','其他'],
       rules: {
         reason: [{ required: true, message: "请填写原因", trigger: "blur" }],
@@ -158,7 +178,31 @@ export default {
   created() {
     this.getleaveform();
   },
+  computed: {
+    pickerOptions() {
+      return {
+        disabledDate: this.disabledDate // 修改这里
+      }
+    }
+  },
   methods: {
+    disabledDate(time) {
+      const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
+      const now = new Date();
+      const yesterday = new Date(now.getTime() - oneDay);
+      const leaveList = this.getLeaveData; // 修改为 this.leaveData
+
+      for (let i = 0; i < leaveList.length; i++) {
+        const start = new Date(leaveList[i].startTime);
+        const end = new Date(leaveList[i].endTime);
+
+        if (time >= start && time <= end) {
+          return true;
+        }
+      }
+
+      return time.getTime() < yesterday;
+    },
     tagType(type){
       return type === "事假" ? 'primary' : type === "病假" ? 'warning' : 'info';
     },
@@ -201,6 +245,7 @@ export default {
     async getleaveform() {
       const res = await getmyLeave(JSON.parse(localStorage.getItem("user")).username);
       this.getLeaveData = res.data;
+      console.log(this.getLeaveData);
     },
     // 添加按钮
     addButton(){

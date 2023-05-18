@@ -1,7 +1,6 @@
 <template>
     <!-- <div> -->
     <div class="cards" @click="goToLink(url)">
-        <!-- 近日，广州疾控监测，蚊媒密度呈逐渐上升趋势…… -->
       <div class="card-left">
         <!-- <div class="card-title">{{ title }}</div> -->
         <div class="card-title">{{ title.length > 42 ? title.slice(0, 42) + '...' : title }}</div>

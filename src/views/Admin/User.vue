@@ -118,17 +118,17 @@
         type="selection"
         width="55">
     </el-table-column>
-    <el-table-column prop="username" label="学号" width="140"></el-table-column>
+    <el-table-column prop="username" label="学号" width="120"></el-table-column>
     <el-table-column prop="nickname" label="姓名" width="100"></el-table-column>
     <el-table-column prop="sex" label="性别" width="62"></el-table-column>
-    <el-table-column prop="role" label="角色"  width="120">
+    <el-table-column prop="role" label="角色"  width="80">
         <template slot-scope="scope">
           <el-tag type="primary" v-if="scope.row.role === 'ROLE_ADMIN'">管理员</el-tag>
           <el-tag type="warning" v-if="scope.row.role === 'ROLE_TEACHER'">老师</el-tag>
           <el-tag type="success" v-if="scope.row.role === 'ROLE_STUDENT'">学生</el-tag>
         </template>
     </el-table-column>
-    <el-table-column prop="phone" label="联系方式" width="120"></el-table-column>
+    <el-table-column prop="phone" label="联系方式" width="100"></el-table-column>
     <el-table-column prop="email" label="邮箱" width="150"></el-table-column>
     
 
@@ -140,7 +140,12 @@
         <el-button
             size="mini"
             icon="el-icon-edit"
-            @click="handleEdit(scope.row)">编辑</el-button>
+            type="warning"
+            @click="handleEdit(scope.row,false)">重设密码</el-button>
+        <el-button
+            size="mini"
+            icon="el-icon-edit"
+            @click="handleEdit(scope.row,true)">编辑</el-button>
 
         <!-- <el-popconfirm
             class="ml-5"
@@ -157,6 +162,7 @@
               type="danger"
               icon="el-icon-delete"
               @click="handleDelete(scope.row)"
+              v-if="scope.row.role !=='ROLE_ADMIN'"
           >删除</el-button>
         <!-- </el-popconfirm> -->
       </template>
@@ -175,6 +181,21 @@
         :total="total">
     </el-pagination>
   </div>
+  <!-- 密码修改 -->
+  <el-dialog title="修改用户密码" :visible.sync="dialogPassVisible" width="30%">
+    <el-form label-width="80px" :rules="rules" ref="form" :model="form">
+      <el-form-item label="用户名" prop="username" >
+        <el-input v-model="form.username" autocomplete="off" disabled></el-input>
+      </el-form-item>
+      <el-form-item label="密码" prop="password" placeholder="请输入密码">
+        <el-input v-model="password" autocomplete="off"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialogPassVisible = false">取 消</el-button>
+      <el-button type="primary" @click="setPassword">确 定</el-button>
+    </div>
+  </el-dialog>
 <!--窗口内容-->
   <el-dialog title="用户信息" :visible.sync="dialogFormVisible" width="30%">
     <el-form label-width="80px" :rules="rules" ref="form" :model="form">
@@ -184,13 +205,14 @@
       <el-form-item label="角色">
         <el-select v-model="form.role" placeholder="请选择角色" style="width: 100%">
           <el-option v-for="item in roles" :key="item.id" :label="item.name" :value="item.flag">
-            <!-- <i :class="item.value" /> {{ item.name }}{{item.value}} -->
+            
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="学号" prop="username">
         <el-input v-model="form.username" autocomplete="off"></el-input>
       </el-form-item>
+      
       <el-form-item label="联系方式">
         <el-input v-model="form.phone" autocomplete="off"></el-input>
       </el-form-item>
@@ -200,12 +222,7 @@
       <el-form-item label="地址">
         <el-input v-model="form.address" autocomplete="off" type="textarea" :rows="2"></el-input>
       </el-form-item>
-      <!-- <el-form-item label="签到状态">
-        <el-select v-model="form.sign" placeholder="请选择签到状态">
-          <el-option label="签到" value="签到"></el-option>
-          <el-option label="未签到" value="未签到"></el-option>
-        </el-select>
-      </el-form-item> -->
+    
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -218,7 +235,7 @@
 <script>
 // import { MessageBox } from 'element-ui';
 import {serverIp} from "../../../public/config";
-import { listUser, getUser, delUsers, addUser, updateUser,importFile,getRole } from "@/api/admin";
+import { listUser, getUser, delUsers, addUser, updateUser,importFile,getRole,setUserPassword } from "@/api/admin";
 import { getToken } from "@/utils/auth";
 const baseURL = process.env.VUE_APP_BASE_API
 export default {
@@ -262,11 +279,17 @@ export default {
        rules: {
         username: [
           { required: true, message: "学号不能为空", trigger: "blur" },
-        ]},
+        ],
+        password: [
+          { required: true, message: "密码不能为空", trigger: "blur" },
+        ]
+      },
       dialogFormVisible:false,
+      dialogPassVisible:false,
       headerBg:'headerBg',
       roles:[],
-      selection:''
+      selection:'',
+      password:null//用于重设密码
     }
   },
   //请求分页查询数据
@@ -298,7 +321,6 @@ export default {
     getList(){
       this.loading = true ;
       listUser(this.queryParams).then(res => {
-     
         this.tableData = res.data.records
         this.total = res.data.total
         this.loading = false;
@@ -328,6 +350,9 @@ export default {
     submitForm(){
       this.$refs["form"].validate((valid) => {
         if (valid) {
+          // if(this.password){
+          //   this.form.password = this.password
+          // }
         addUser(this.form).then(res=>{
         // this.request.post("/user",this.form).then(res=>{
           if(res.code ==="200"){
@@ -342,12 +367,39 @@ export default {
       }
     })
     },
+    setPassword(){
+        this.$refs["form"].validate((valid) => {
+          if (valid) {
+            // if(this.password){
+            //   this.form.password = this.password
+            // }
+          this.form.password = this.password
+          setUserPassword(this.form).then(res=>{
+          // this.request.post("/user",this.form).then(res=>{
+            if(res.code ==="200"){
+              this.$message.success("设置成功")
+              this.dialogPassVisible=false
+              this.getList()
+            }else{
+              this.$message.error("设置失败")
+            }
+
+          })
+        }
+      })
+    },
     // 修改按钮操作
-    handleEdit(row) {
+    handleEdit(row,flag) {
       this.resetForm("form");
+      this.password = null;
       const data =  row.id ? row : this.selection[0]
       this.form = JSON.parse(JSON.stringify(data)) //深度拷贝
-      this.dialogFormVisible = true
+      if(flag){
+        this.dialogFormVisible = true
+      }else{
+        this.dialogPassVisible = true
+      }
+      
     },
     //删操作
     // handleDelete(row) {
@@ -428,7 +480,7 @@ export default {
       var formData = new FormData();
       formData.append("file", params);
       
-      console.log("测试1",formData)
+      // console.log("测试1",formData)
       importFile(formData).then((res) => {
         // this.request.post
           console.log("测试",res);
@@ -449,7 +501,6 @@ export default {
           } else {
             this.$message.error("用户已存在，无需上传");
           }
-      // this.$modal.notifySuccess("导入成功,密码默认123456，角色为学生")
       this.loading = false
       this.getList()
     },

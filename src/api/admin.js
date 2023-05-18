@@ -40,7 +40,13 @@ export function updateUser(data) {
     data: data
   })
 }
-  
+export function setUserPassword(data) {
+  return request({
+    url: '/user/setpassword',
+    method: 'put',
+    data: data
+  })
+}
 // 删除用户信息
 export function delUser(userId) {
   return request({
